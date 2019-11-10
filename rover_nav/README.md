@@ -41,13 +41,24 @@ https://github.com/danielsnider/MapViz-Tile-Map-Google-Maps-Satellite
 * `sudo docker run -p 8080:8080 -d -t -v ~/mapproxy:/mapproxy danielsnider/mapproxy`
 * `Base url for the tile map plugin (if not there already): http://localhost:8080/wmts/gm_layer/gm_grid/{level}/{x}/{y}.png`
 
-# Displaying ideal path in Mapviz
+# Waypoints
+
+### Listing waypoint coordinates
+Coordinates are listed in `gpsGoals.txt`. Each point must be written on a seperate line. You can write comments on a line or at the end
+of a coordinate by prefacing it with a `#`. Comments will be ignored by the parser.
+
+### Displaying ideal path in Mapviz
 1. Run mapviz and add the path plugin (Add -> path -> Ok)
 2. Run the parsePathServer with `rosrun rover_nav parsePathServer.py`
 3. Change the content of gpsGoals.txt to the desired coordinates and save.
 4. In the path plugin in mapviz, choose the topic "/path_topic"
 5. Call the service with `rosservice call /parsePath`
 6. The path should now display on the map. Recall the service anytime you modify gpsGoals.txt to apply the changes.
+
+### Setting waypoint as a goal
+** The path must be published before doing this part, see previous section **
+1. Make sure parsePathServer is running and that the path is published
+2. Call the service with `rosservice call /setWaypoint <waypointNumber>`
 
 # Installing robot_localization
 1. Download the source code https://github.com/cra-ros-pkg/robot_localization/releases/tag/2.6.5

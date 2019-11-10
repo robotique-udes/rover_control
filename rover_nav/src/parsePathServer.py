@@ -1,12 +1,13 @@
 #!/usr/bin/python
 
-# Description: Parses a text file containing a list of coordinates and makes an array of
-#              poses to publish a path message.
+# Description: Contains two services:
+#                (1): Parses gpsGoals.txt, creates an array of poses and publishes it as a Path msg.
+#                (2): Publishes a specific waypoint from the pose array as a PoseStamped msg.
 #
 # Authors: Jeremie Bourque
 #
-# Date: 27-09-2019
-#
+# Date created: 27-10-2019
+# Date last updated: 10-11-2019
 
 # gpsGoals.txt example:
 #   #Example comment
@@ -20,29 +21,47 @@ from nav_msgs.msg import Path
 from std_msgs.msg import Header
 from geometry_msgs.msg import PoseStamped
 from rover_nav.srv import parsePath, parsePathResponse
+from rover_nav.srv import setWaypoint, setWaypointResponse
 
-GPSGoalsFile = "/home/jeremie/Rover/src/rover_control/rover_nav/src/gpsGoals.txt"
+GPSGoalsFile = "src/rover_control/rover_nav/src/gpsGoals.txt"
+poseArray = []
 
+# Initialize the node and services.
 def parsePathServer():
     rospy.init_node('parsePathServer')     
-    s = rospy.Service('parsePath', parsePath, handleParsePath)
+    s1 = rospy.Service('parsePath', parsePath, handleParsePath)
+    s2 = rospy.Service('setWaypoint', setWaypoint, handleSetWaypoint)
     print "Ready"
     rospy.spin()
      
+# Handle parsePath service requests 
 def handleParsePath(req):
     print "Parsing gpsGoals.txt"
     path = Path()
     path.header = makeHeader("wgs84")
-    path.poses = parseGPSGoals()
-    pub.publish(path)
+    parseGPSGoals()
+    path.poses = poseArray
+    pubPath.publish(path)
     return "Parsing completed"
+
+# Handle setWaypoint service requests
+def handleSetWaypoint(req):
+    global poseArray
+    print "Setting waypoint #%d" % (req.waypointNumber)
+    if len(poseArray) == 0:  # No path published, return error
+        print "Path empty, make sure you published the path first"
+        return "Failed, no path published"
+    pubWaypoint.publish(poseArray[req.waypointNumber-1])
+    print str(poseArray[req.waypointNumber-1])
+    print "Waypoint set"
+    return "Success"
 
 # Parses the GPS goals text file to get array of gps goals.
 def parseGPSGoals():
-    poseArray = []
+    global poseArray
     with open(GPSGoalsFile) as goals:
         lines = goals.readlines()
-        print("--GPS Goals--")
+        print("--Waypoints--")
         for line in lines:
             # Remove comment part of the line.
             lineWithoutComment = line[0:line.find("#")]         
@@ -58,8 +77,7 @@ def parseGPSGoals():
                     pose.pose.position.y = lat
                     poseArray.append(pose)
                 except ValueError:
-                    print "Not a float, ignoring line."
-    return poseArray           
+                    print "Not a float, ignoring line."           
 
 # Makes the header message needed for the other messages.
 def makeHeader(frame_id):
@@ -69,6 +87,7 @@ def makeHeader(frame_id):
     return header
     
 if __name__ == '__main__':
-    pub = rospy.Publisher('path_topic', Path, queue_size=10)
+    pubPath = rospy.Publisher('path_topic', Path, queue_size=10)
+    pubWaypoint = rospy.Publisher('waypoint_topic', PoseStamped, queue_size=10)
     parsePathServer()
 
