@@ -1,7 +1,13 @@
-# Basic setup
+# rover_nav dependencies
+* mapviz
+* docker
+* robot_localization 2.6.5
+
+# Mapviz
+
 ### Dependencies
 * mapviz
-	
+
 ### Installing mapviz
 https://github.com/swri-robotics/mapviz
 
@@ -43,3 +49,8 @@ https://github.com/danielsnider/MapViz-Tile-Map-Google-Maps-Satellite
 5. Call the service with `rosservice call /parsePath`
 6. The path should now display on the map. Recall the service anytime you modify gpsGoals.txt to apply the changes.
 
+# Installing robot_localization
+1. Download the source code https://github.com/cra-ros-pkg/robot_localization/releases/tag/2.6.5
+2. Extract to /{workspace}/src/
+3. run `rospack profile`in a terminal to to force an update of the package cache
+4. build by going to the root of the worspace and using the command `catkin_make`
