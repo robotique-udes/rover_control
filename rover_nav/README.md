@@ -1,6 +1,7 @@
 # rover_nav dependencies
 * mapviz
 * docker
+* geographiclib
 * robot_localization 2.6.5
 
 # Mapviz
@@ -59,6 +60,9 @@ of a coordinate by prefacing it with a `#`. Comments will be ignored by the pars
 ** The path must be published before doing this part, see previous section **
 1. Make sure parsePathServer is running and that the path is published
 2. Call the service with `rosservice call /setWaypoint <waypointNumber>`
+
+# Installing geographiclib
+1. pip install geographiclib
 
 # Installing robot_localization
 1. Download the source code https://github.com/cra-ros-pkg/robot_localization/releases/tag/2.6.5
