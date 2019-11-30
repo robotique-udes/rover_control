@@ -55,7 +55,11 @@ find_package(catkin REQUIRED COMPONENTS
 ## Generate services in the 'srv' folder
  add_service_files(
    FILES
+<<<<<<< HEAD
+   createPath.srv
+=======
    parsePath.srv
+>>>>>>> 8f086598513f0a85ef6771aafe080eaaecc1d31e
    setWaypoint.srv
  )
 

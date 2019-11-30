@@ -5,8 +5,16 @@
 #
 # Date created: 30-11-2019
 # Date last updated: 30-11-2019
+<<<<<<< HEAD
+
+import rospy
 import math
 from geographiclib.geodesic import Geodesic
+from geometry_msgs.msg import PoseStamped
+=======
+import math
+from geographiclib.geodesic import Geodesic
+>>>>>>> 8f086598513f0a85ef6771aafe080eaaecc1d31e
 
 # Calculates distance between two points in meters
 # Slightly modified from http://wiki.ros.org/gps_goal
@@ -95,6 +103,18 @@ class Geopoint(object):
 
         return x, y
 
+<<<<<<< HEAD
+    # Converts geopoint to a PoseStamped message
+    def poseStamped(self):
+        pose = PoseStamped()
+        pose.header.stamp = rospy.Time.now()
+        pose.header.frame_id = "wgs84"
+        pose.pose.position.x = self.lon
+        pose.pose.position.y = self.lat
+        return pose
+
+=======
+>>>>>>> 8f086598513f0a85ef6771aafe080eaaecc1d31e
     def __str__(self):
         return '<' + str(self.lat) + ',' + str(self.lon) + '>'
 

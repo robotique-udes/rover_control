@@ -50,6 +50,16 @@ of a coordinate by prefacing it with a `#`. Comments will be ignored by the pars
 
 ### Displaying ideal path in Mapviz
 1. Run mapviz and add the path plugin (Add -> path -> Ok)
+<<<<<<< HEAD
+2. Run the pathMgr with `rosrun rover_nav pathMgr.py`
+3. Change the content of gpsGoals.txt to the desired coordinates and save.
+4. In the path plugin in mapviz, choose the topic "/path_topic"
+5. Call the service with `rosservice call /createPath`
+6. The path should now display on the map. Recall the service anytime you modify gpsGoals.txt to apply the changes.
+
+### Setting waypoint as a goal
+1. Make sure pathMgr is running.
+=======
 2. Run the parsePathServer with `rosrun rover_nav parsePathServer.py`
 3. Change the content of gpsGoals.txt to the desired coordinates and save.
 4. In the path plugin in mapviz, choose the topic "/path_topic"
@@ -59,6 +69,7 @@ of a coordinate by prefacing it with a `#`. Comments will be ignored by the pars
 ### Setting waypoint as a goal
 ** The path must be published before doing this part, see previous section **
 1. Make sure parsePathServer is running and that the path is published
+>>>>>>> 8f086598513f0a85ef6771aafe080eaaecc1d31e
 2. Call the service with `rosservice call /setWaypoint <waypointNumber>`
 
 # Installing geographiclib
