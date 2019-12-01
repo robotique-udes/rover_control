@@ -78,7 +78,7 @@ def handleSetWaypoint(req):
 
 # Parses the GPS goals text file to get array of gps goals.
 def parseGPSGoals():
-    count = 0
+    count = 1
     geopoints = []
     with open(GPSGoalsFile) as goals:
         lines = goals.readlines()
@@ -90,19 +90,21 @@ def parseGPSGoals():
             comment = comment.rstrip()
             if len(lineWithoutComment) != 0:
                 if lineWithoutComment[-1] == ' ':
-                    lineWithoutComment = lineWithoutComment[:-1] # Remove unwanted space at the end of the string
+                    lineWithoutComment = lineWithoutComment[:-1]  # Remove unwanted space at the end of the string
                 coordinate = lineWithoutComment.split(",")
-                count += 1
                 try:         
                     lat = float(coordinate[0])
                     lon = float(coordinate[1])
                     gp = Geopoint()
                     gp.setLon(lon)
                     gp.setLat(lat)
+                    description = str(count)
                     if len(comment) != 0:
-                        gp.setDescription(comment)
+                        description += ": " + comment[1:]
+                    gp.setDescription(description)
                     print(str(count) + " " + str(gp))
                     geopoints.append(gp)
+                    count += 1
                 except ValueError:
                     print("Not a float, ignoring line.")
     return geopoints

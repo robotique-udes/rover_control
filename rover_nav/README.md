@@ -50,23 +50,25 @@ of a coordinate by prefacing it with a `#`. Comments will be ignored by the pars
 
 ### Displaying ideal path in Mapviz
 1. Run mapviz and add the path plugin (Add -> path -> Ok)
-2. Run the pathMgr with `rosrun rover_nav pathMgr.py`
-3. Change the content of gpsGoals.txt to the desired coordinates and save.
-4. In the path plugin in mapviz, choose the topic "/path_topic"
-5. Call the service with `rosservice call /createPath`
-6. The path should now display on the map. Recall the service anytime you modify gpsGoals.txt to apply the changes.
+2. add the marker plugin (Add -> marker -> Ok)
+3. Run the pathMgr with `rosrun rover_nav pathMgr.py`
+4. Change the content of gpsGoals.txt to the desired coordinates and save.
+5. In the path plugin in mapviz, choose the topic "/path_topic"
+6. In the marker plugin, choose the topic "/path_marker_topic"
+7. Call the service with `rosservice call /createPath`
+8. The path should now display on the map. Recall the service anytime you modify gpsGoals.txt to apply the changes.
 
 ### Setting waypoint as a goal
 1. Make sure pathMgr is running.
-2. Run the parsePathServer with `rosrun rover_nav parsePathServer.py`
-3. Change the content of gpsGoals.txt to the desired coordinates and save.
-4. In the path plugin in mapviz, choose the topic "/path_topic"
-5. Call the service with `rosservice call /createPath`
-6. The path should now display on the map. Recall the service anytime you modify gpsGoals.txt to apply the changes.
-
-### Setting waypoint as a goal
-1. Make sure pathMgr is running.
+2. Add another marker plugin (Add -> marker -> Ok) and choose the topic "/marker_topic"
 2. Call the service with `rosservice call /setWaypoint <waypointNumber>`
+
+### Plugin order
+The order in which the plugins are stacked on top of each other matters since they can hide what is under it (like layers). The order from top to bottom should be the following.
+* tile_map
+* path
+* marker (/marker_topic)
+* marker (/path_marker_topic)
 
 # Installing geographiclib
 1. pip install geographiclib
