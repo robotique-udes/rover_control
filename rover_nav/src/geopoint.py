@@ -1,16 +1,15 @@
 #!/usr/bin/python
-# Description: Geopoint object (lat,lon) along with other useful geographic functions
+# Description: Geopoint object (lat,lon,description) along with other useful geographic functions
 #
 # Authors: Jeremie Bourque
 #
 # Date created: 30-11-2019
-# Date last updated: 30-11-2019
+# Date last updated: 01-12-2019
 
 import rospy
 import math
-from geographiclib.geodesic import Geodesic
 from geometry_msgs.msg import PoseStamped, Pose
-import math
+from visualization_msgs.msg import Marker, MarkerArray
 from geographiclib.geodesic import Geodesic
 
 # Calculates distance between two points in meters
@@ -42,9 +41,10 @@ def distanceBetween2CoordsXY(point1, point2):
 
 
 class Geopoint(object):
-    def __init__(self, lat=200, lon=200):  # Note: 200,200 represents an invalid coordinate
+    def __init__(self, lat=200, lon=200, description=""):  # Note: 200,200 represents an invalid coordinate
         self.lat = lat
         self.lon = lon
+        self.description = description
 
     def getLat(self):
         return self.lat
@@ -52,11 +52,17 @@ class Geopoint(object):
     def getLon(self):
         return self.lon
 
+    def getDescription(self):
+        return self.description
+
     def setLat(self, newLat):
         self.lat = newLat
 
     def setLon(self, newLon):
         self.lon = newLon
+
+    def setDescription(self, newDescription):
+        self.description = newDescription
 
     # Get a Geopoint with coordinates converted from rad to deg
     def radToDeg(self):
@@ -100,30 +106,64 @@ class Geopoint(object):
 
         return x, y
 
-    # Converts geopoint to a PoseStamped message
+    # Creates a PoseStamped message
     def pose(self):
         pose = Pose()
-        pose.pose.position.x = self.lon
-        pose.pose.position.y = self.lat
+        pose.position.x = self.lon
+        pose.position.y = self.lat
         return pose
 
-    # Converts geopoint to a PoseStamped message
-    def poseStamped(self):
+    # Creates a PoseStamped message
+    def poseStamped(self, frame_id):
         pose = PoseStamped()
         pose.header.stamp = rospy.Time.now()
-        pose.header.frame_id = "wgs84"
+        pose.header.frame_id = frame_id
         pose.pose.position.x = self.lon
         pose.pose.position.y = self.lat
         return pose
 
+    # Creates a marker message
+    def marker(self, frame_id, waypointNum, type, color):
+        # type = Marker().TYPE
+        # refer to message definition for list of types
+        marker = Marker()
+        marker.header.frame_id = frame_id
+        marker.header.stamp = rospy.Time.now()
+        marker.ns = "Current goal: waypoint #%d" % (waypointNum)
+        marker.id = 0
+        marker.type = type
+        marker.action = 0
+        marker.pose.position.x = 1
+        marker.pose.position.y = 1
+        marker.pose.position.z = 1
+        marker.pose = self.pose()
+        marker.scale.x = 5
+        marker.scale.y = 5
+        marker.scale.z = 5
+        marker.color.a = 1.0
+        marker.color.r = color[0]
+        marker.color.g = color[1]
+        marker.color.b = color[2]
+        if (type == Marker().TEXT_VIEW_FACING):
+            marker.text = self.description
+        return marker
+
+    # Creates a marker for the geopoint along with a tag of the description if it exists
+    def markerArray(self, frame_id, waypointNum, type):
+        markerarray = MarkerArray()
+        markerarray.markers.append(self.marker(frame_id, waypointNum, type, [0,1,0]))
+        if len(self.description) != 0:
+            markerarray.markers.append(self.marker(frame_id, 666, Marker().TEXT_VIEW_FACING, [1,1,0]))
+        return markerarray
+
     def __str__(self):
-        return '<' + str(self.lat) + ',' + str(self.lon) + '>'
+        return '<' + str(self.lat) + ',' + str(self.lon) + " " + str(self.description) + '>'
 
     def __eq__(self, other):
         return self.lat == other.lat and self.lon == other.lon
 
     def __repr__(self):
-        return "Coordinate(%d, %d)" % (self.lat, self.lon)
+        return "Coordinate(%d, %d) Description: %s" % (self.lat, self.lon, self.description)
 
 # Unit tests
 # point1 = Geopoint(45, 73)

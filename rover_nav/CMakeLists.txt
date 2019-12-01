@@ -56,7 +56,6 @@ find_package(catkin REQUIRED COMPONENTS
  add_service_files(
    FILES
    createPath.srv
-   parsePath.srv
    setWaypoint.srv
  )
 
