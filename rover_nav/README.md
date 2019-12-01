@@ -38,9 +38,12 @@ https://docs.docker.com/v17.12/install/linux/docker-ce/ubuntu/#uninstall-old-ver
 Follow instructions of section 1 only.
 https://github.com/danielsnider/MapViz-Tile-Map-Google-Maps-Satellite
 
-### To do at every boot (<em>TODO: automate this process on startup</em>):
-* `sudo docker run -p 8080:8080 -d -t -v ~/mapproxy:/mapproxy danielsnider/mapproxy`
-* `Base url for the tile map plugin (if not there already): http://localhost:8080/wmts/gm_layer/gm_grid/{level}/{x}/{y}.png`
+### Automate startup of the mapproxy server at boot:
+1. Open a terminal and type `sudo crontab -e`
+2. Choose any text editor
+3. Add this line after the comments: `@reboot sudo docker run -p 8080:8080 -d -t -v ~/mapproxy:/mapproxy danielsnider/mapproxy`
+
+**Base url for the tile map plugin (if not there already):** `http://localhost:8080/wmts/gm_layer/gm_grid/{level}/{x}/{y}.png`
 
 # Waypoints
 
