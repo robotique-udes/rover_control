@@ -72,7 +72,6 @@ class Geopoint(object):
         return geopointDeg
 
     # Get a Geopoint with coordinates converted from rad to deg
-    # Slightly modified from http://wiki.ros.org/gps_goal
     def degToRad(self):
         geopointRad = Geopoint()
         geopointRad.lat = math.radians(self.lat)
@@ -81,30 +80,11 @@ class Geopoint(object):
 
     # Returns distance in meters from self to a target point
     def distanceTo(self, target):
-        # Calculate distance and azimuth between GPS points
-        geod = Geodesic.WGS84  # define the WGS84 ellipsoid
-        g = geod.Inverse(self.lat, self.lon, target.lat,
-                         target.lon)  # Compute several geodesic calculations between two GPS points
-        hypotenuse = distance = g['s12']  # access distance
-        return hypotenuse
+        return distanceBetween2Coords(self, target)
 
     # Returns distance in meters from self to a target point in the X and Y directions
-    # Slightly modified from http://wiki.ros.org/gps_goal
     def distanceToXY(self, target):
-        # Calculate distance and azimuth between GPS points
-        geod = Geodesic.WGS84  # define the WGS84 ellipsoid
-        g = geod.Inverse(self.lat, self.lon, target.lat,
-                         target.lon)  # Compute several geodesic calculations between two GPS points
-        hypotenuse = distance = g['s12']  # access distance
-        azimuth = g['azi1']
-
-        # Convert polar (distance and azimuth) to x,y translation in meters (needed for ROS) by finding side lengths of a right-angle triangle
-        # Convert azimuth to radians
-        azimuth = math.radians(azimuth)
-        x = adjacent = math.cos(azimuth) * hypotenuse
-        y = opposite = math.sin(azimuth) * hypotenuse
-
-        return x, y
+        return distanceBetween2CoordsXY(self, target)
 
     # Creates a PoseStamped message
     def pose(self):
@@ -166,29 +146,30 @@ class Geopoint(object):
         return "Coordinate(%d, %d) Description: %s" % (self.lat, self.lon, self.description)
 
 # Unit tests
-# point1 = Geopoint(45, 73)
-# point2 = Geopoint(45.5, 73.5)
-#
-# print("--get lat/lon point1--")
-# print(point1.getLat())
-# print(point1.getLon())
-# print("--get lat/lon point2--")
-# print(point2.getLat())
-# print(point2.getLon())
-# print("--get distance from point1 to point2")
-# print(point1.distanceTo(point2))
-# print("--get distance from point2 to point1")
-# print(point2.distanceTo(point1))
-# print("--get distanceXY from point1 to point2")
-# print(point1.distanceToXY(point2))
-# print("--get distanceXY from point2 to point1")
-# print(point2.distanceToXY(point1))
-# print("--Convert point1 deg to rad--")
-# print(point1.degToRad())
-# print("--Convert point2 deg to rad--")
-# print(point2.degToRad())
-# print("--Convert point1 rad to deg")
-# print(point1.degToRad().radToDeg())
-# print("--Convert point2 rad to deg")
-# print(point2.degToRad().radToDeg())
+point1 = Geopoint(45, 73)
+point2 = Geopoint(45.5, 73.5)
+
+print("--get lat/lon point1--")
+print(point1.getLat())
+print(point1.getLon())
+print("--get lat/lon point2--")
+print(point2.getLat())
+print(point2.getLon())
+print("--get distance from point1 to point2")
+print(point1.distanceTo(point2))
+print("--get distance from point2 to point1")
+print(point2.distanceTo(point1))
+print("--get distanceXY from point1 to point2")
+print(point1.distanceToXY(point2))
+print("--get distanceXY from point2 to point1")
+print(point2.distanceToXY(point1))
+print("--Convert point1 deg to rad--")
+print(point1.degToRad())
+print("--Convert point2 deg to rad--")
+print(point2.degToRad())
+print("--Convert point1 rad to deg")
+print(point1.degToRad().radToDeg())
+print("--Convert point2 rad to deg")
+print(point2.degToRad().radToDeg())
+
 

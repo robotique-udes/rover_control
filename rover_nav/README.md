@@ -15,13 +15,9 @@ https://github.com/swri-robotics/mapviz
 ### Launching mapviz only
 roslaunch mapviz mapviz.launch
 
-### Launching mapviz + simulated GPS values
-roslaunch rover_nav simulation.launch
-
-### Displaying gps coordinated on map
-1. Add gps plugin (Add -> gps -> Ok)
-2. Select topic "/pos" (First point is at coordinates 45.5,-73.5)
-3. Add tile_map plugin (Add -> tile_map -> Ok)
+### Configuring Mapviz
+After opening Mapviz, click File->Open config and open /path/to/rover_nav/mapvizconfig.mvc
+**Remember to reopen the config files if it was modified**
 
 # How to get Google Maps satelite imagery in Mapviz
 ### Dependencies
@@ -52,26 +48,14 @@ Coordinates are listed in `gpsGoals.txt`. Each point must be written on a sepera
 of a coordinate by prefacing it with a `#`. Comments will be ignored by the parser.
 
 ### Displaying ideal path in Mapviz
-1. Run mapviz and add the path plugin (Add -> path -> Ok)
-2. add the marker plugin (Add -> marker -> Ok)
-3. Run the pathMgr with `rosrun rover_nav pathMgr.py`
-4. Change the content of gpsGoals.txt to the desired coordinates and save.
-5. In the path plugin in mapviz, choose the topic "/path_topic"
-6. In the marker plugin, choose the topic "/path_marker_topic"
-7. Call the service with `rosservice call /createPath`
-8. The path should now display on the map. Recall the service anytime you modify gpsGoals.txt to apply the changes.
+1. Run the pathMgr with `rosrun rover_nav pathMgr.py`
+2. Change the content of gpsGoals.txt to the desired coordinates and save.
+3. Call the service with `rosservice call /createPath`
+4. The path should now display on the map. Recall the service anytime you modify gpsGoals.txt to apply the changes.
 
 ### Setting waypoint as a goal
 1. Make sure pathMgr is running.
-2. Add another marker plugin (Add -> marker -> Ok) and choose the topic "/marker_topic"
 2. Call the service with `rosservice call /setWaypoint <waypointNumber>`
-
-### Plugin order
-The order in which the plugins are stacked on top of each other matters since they can hide what is under it (like layers). The order from top to bottom should be the following.
-* tile_map
-* path
-* marker (/marker_topic)
-* marker (/path_marker_topic)
 
 # Installing geographiclib
 1. pip install geographiclib
