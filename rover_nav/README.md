@@ -2,12 +2,8 @@
 * mapviz
 * docker
 * geographiclib
-* robot_localization 2.6.5
 
 # Mapviz
-
-### Dependencies
-* mapviz
 
 ### Installing mapviz
 https://github.com/swri-robotics/mapviz
@@ -41,27 +37,31 @@ https://github.com/danielsnider/MapViz-Tile-Map-Google-Maps-Satellite
 
 **Base url for the tile map plugin (if not there already):** `http://localhost:8080/wmts/gm_layer/gm_grid/{level}/{x}/{y}.png`
 
-# Waypoints
+# Autonomous navigation simulation
 
 ### Listing waypoint coordinates
 Coordinates are listed in `gpsGoals.txt`. Each point must be written on a seperate line. You can write comments on a line or at the end
 of a coordinate by prefacing it with a `#`. Comments will be ignored by the parser.
 
+### Changing the rover's starting position
+In rover_sim.py, change the values of currentLat and currentLon to any valid wgs84 coordinate.
+
+### Changing the map's origin
+In simulation.launch, change the coordinates to any valid wgs84 coordinate. Note that to that the origin should be near the rover's position in order to have the best accuracy.
+
+### Launching the simulation
+Open a terminal and enter the following command: `roslaunch rover_nav simulation.launch`
+This will launch mapviz along with all other necessary nodes.
+
 ### Displaying ideal path in Mapviz
-1. Run the pathMgr with `rosrun rover_nav pathMgr.py`
-2. Change the content of gpsGoals.txt to the desired coordinates and save.
-3. Call the service with `rosservice call /createPath`
-4. The path should now display on the map. Recall the service anytime you modify gpsGoals.txt to apply the changes.
+1. Change the content of gpsGoals.txt to the desired coordinates and save.
+2. In a different terminal, call the createPath service with `rosservice call /createPath`
+3. The path should now display on the map. Recall the service anytime you modify gpsGoals.txt to apply the changes.
 
 ### Setting waypoint as a goal
 1. Make sure pathMgr is running.
-2. Call the service with `rosservice call /setWaypoint <waypointNumber>`
+2. In a different terminal, call the setWaypoint service with `rosservice call /setWaypoint <waypointNumber>`
+3. The rover will automatically move towards the goal and the navigation will be stopped when the goal is reached.
 
 # Installing geographiclib
 1. pip install geographiclib
-
-# Installing robot_localization
-1. Download the source code https://github.com/cra-ros-pkg/robot_localization/releases/tag/2.6.5
-2. Extract to /{workspace}/src/
-3. run `rospack profile`in a terminal to to force an update of the package cache
-4. build by going to the root of the worspace and using the command `catkin_make`

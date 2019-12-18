@@ -25,6 +25,7 @@ from visualization_msgs.msg import Marker, MarkerArray
 from rover_nav.srv import createPath, createPathResponse
 from rover_nav.srv import setWaypoint, setWaypointResponse
 
+
 # Set current working directory as the path of this file
 abspath = os.path.abspath(__file__)
 dname = os.path.dirname(abspath)
@@ -37,13 +38,12 @@ def pathMgr():
     rospy.init_node('pathMgr')
     s1 = rospy.Service('createPath', createPath, handleCreatePath)
     s2 = rospy.Service('setWaypoint', setWaypoint, handleSetWaypoint)
-    print("Ready")
+    rospy.loginfo("PathMgr ready")
     rospy.spin()
      
 # Handle createPath service requests
 def handleCreatePath(req):
-    print("Creating path")
-    print(os.getcwd())
+    rospy.loginfo("Creating path")
     path = Path()
     markerarray = MarkerArray()
     path.header.frame_id = "wgs84"
@@ -61,28 +61,28 @@ def handleCreatePath(req):
 
 # Handle setWaypoint service requests
 def handleSetWaypoint(req):
-    print("Setting waypoint #%d" % (req.waypointNumber))
+    rospy.loginfo("Setting waypoint #%d as goal" % (req.waypointNumber))
     geopoints = parseGPSGoals()
     if len(geopoints) == 0:  # No path published, return error
-        print("Failed, path empty")
+        rospy.logwarn("Failed to create path, there are no points in the txt file")
         return "Failed, path empty"
     try:
         pubWaypoint.publish(geopoints[req.waypointNumber-1].poseStamped("wgs84"))
         pubMarker.publish(deleteAllMarkers())
         pubMarker.publish(geopoints[req.waypointNumber - 1].marker("wgs84", req.waypointNumber, Marker().SPHERE, [0,1,0]))
     except IndexError:
-        print("waypoint number out of bounds")
-    print(str(geopoints[req.waypointNumber - 1]))
-    print("Waypoint set")
+        rospy.logwarn("Waypoint number out of bounds")
+    rospy.loginfo(str(geopoints[req.waypointNumber - 1]) + "waypoint set")
     return "Success"
 
 # Parses the GPS goals text file to get array of gps goals.
 def parseGPSGoals():
+    # TODO: As a user, I want to easily see the list of points along with their number
     count = 1
     geopoints = []
     with open(GPSGoalsFile) as goals:
         lines = goals.readlines()
-        print("--Waypoints--")
+        #print("--Waypoints--")
         for line in lines:
             # Remove comment part of the line.
             lineWithoutComment = line[0:line.find("#")]
@@ -102,14 +102,14 @@ def parseGPSGoals():
                     if len(comment) != 0:
                         description += ": " + comment[1:]
                     gp.setDescription(description)
-                    print(str(count) + " " + str(gp))
+                    #print(str(count) + " " + str(gp))
                     geopoints.append(gp)
                     count += 1
                 except ValueError:
-                    print("Not a float, ignoring line.")
+                    rospy.loginfo("Not a float, ignoring line.")
     return geopoints
 
-# Creates maker message with the action to delete all markers.
+# Creates marker message with the action to delete all markers.
 def deleteAllMarkerArrays():
     markerarray = MarkerArray()
     marker = Marker()
