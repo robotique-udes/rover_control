@@ -25,7 +25,6 @@ currentHeading = -0.5
 
 
 def sendTransform():
-    global currentLat, currentLon, currentHeading, origin_pose
     (currentX, currentY) = Wgs84ToXY(currentLat, currentLon)
     # Send transform of rover in the map frame
     br.sendTransform((currentX, currentY, 0),

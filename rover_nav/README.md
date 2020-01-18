@@ -37,20 +37,24 @@ https://github.com/danielsnider/MapViz-Tile-Map-Google-Maps-Satellite
 
 **Base url for the tile map plugin (if not there already):** `http://localhost:8080/wmts/gm_layer/gm_grid/{level}/{x}/{y}.png`
 
-# Autonomous navigation simulation
+# Autonomous navigation
 
 ### Listing waypoint coordinates
 Coordinates are listed in `gpsGoals.txt`. Each point must be written on a seperate line. You can write comments on a line or at the end
 of a coordinate by prefacing it with a `#`. Comments will be ignored by the parser.
 
-### Changing the rover's starting position
+### Changing the simulated rover's starting position
 In rover_sim.py, change the values of currentLat and currentLon to any valid wgs84 coordinate.
 
 ### Changing the map's origin
-In simulation.launch, change the coordinates to any valid wgs84 coordinate. Note that to that the origin should be near the rover's position in order to have the best accuracy.
+In simulation.launch, change the coordinates to any valid wgs84 coordinate. Note that to that the origin should be near the rover's position in order to have the best accuracy. This can also be done automatically using the first gps fix available. (See launch file for more info)
 
 ### Launching the simulation
 Open a terminal and enter the following command: `roslaunch rover_nav simulation.launch`
+This will launch mapviz along with all other necessary nodes.
+
+### Launching the mini-rover implementation
+Open a terminal and enter the following command: `roslaunch rover_nav mini-rover.launch`
 This will launch mapviz along with all other necessary nodes.
 
 ### Displaying ideal path in Mapviz
