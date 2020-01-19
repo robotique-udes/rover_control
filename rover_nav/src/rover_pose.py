@@ -21,11 +21,13 @@ currentHeading = 0
 
 
 def updatePosition(data):
+    global currentLat, currentLon
     currentLat = data.latitude
     currentLon = data.longitude
 
 
 def updateHeading(data):
+    global currentHeading
     pass
     #currentHeading = data.heading TODO
 
