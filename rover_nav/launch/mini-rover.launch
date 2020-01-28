@@ -1,10 +1,13 @@
 <launch>
 
+  <machine name="rover" address="192.168.0.151" env-loader="/opt/ros/melodic/env.sh" user="jeremie"/>
+  <machine name="base_station" address="192.168.0.171" env-loader="/opt/ros/melodic/env.sh" user="jeremie"/>
+
   <include file="$(find nmea_navsat_driver)/launch/nmea_serial_driver.launch" />
 
-  <node pkg="mapviz" type="mapviz" name="mapviz"></node>
+  <node pkg="mapviz" type="mapviz" name="mapviz" machine="base_station"/>
 
-  <node pkg="swri_transform_util" type="initialize_origin.py" name="initialize_origin" >
+  <node pkg="swri_transform_util" type="initialize_origin.py" name="initialize_origin" machine="base_station">
     <param name="local_xy_frame" value="/map"/>
     <param name="local_xy_origin" value="auto"/>  <!-- setting "auto" here will set the origin to the first GPS fix that it recieves -->
     <rosparam param="local_xy_origins">
@@ -16,10 +19,10 @@
     </rosparam>
   </node>
 
-  <node pkg="tf" type="static_transform_publisher" name="swri_transform" args="0 0 0 0 0 0 /map /origin 100"  />
+  <node pkg="tf" type="static_transform_publisher" name="swri_transform" args="0 0 0 0 0 0 /map /origin 100" machine="base_station" />
 	
-  <node pkg="rover_nav" type="pathMgr.py" name="pathMgr" />
-  <node pkg="rover_nav" type="rover_pose.py" name="rover_sim" /> 
-  <node pkg="rover_nav" type="navigation.py" name="navigation" />
+  <node pkg="rover_nav" type="pathMgr.py" name="pathMgr" machine="rover"/>
+  <node pkg="rover_nav" type="rover_pose.py" name="rover_sim" machine="rover"/> 
+  <node pkg="rover_nav" type="navigation.py" name="navigation" machine="rover"/>
 
 </launch>
