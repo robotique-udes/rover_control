@@ -172,9 +172,9 @@ class Geopoint(object):
         marker.pose.position.y = 1
         marker.pose.position.z = 1
         marker.pose = self.pose()
-        marker.scale.x = 5
-        marker.scale.y = 5
-        marker.scale.z = 5
+        marker.scale.x = 1
+        marker.scale.y = 1
+        marker.scale.z = 1
         marker.color.a = 1.0
         marker.color.r = color[0]
         marker.color.g = color[1]

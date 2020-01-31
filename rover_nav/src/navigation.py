@@ -56,7 +56,7 @@ def handleGoal(data):
         cmd = Twist()
         cmd.linear.x = 0.5 * math.sqrt(x**2 + y**2) # The constant defines the aggressiveness of the command. (higher = more aggressive)
         cmd.angular.z = 0.75 * math.atan2(y, x)  # The constant defines the aggressiveness of the command. (higher = more aggressive)
-        turtle_vel.publish(cmd)
+        nav_cmd.publish(cmd)
         rate.sleep()
     rospy.loginfo("Navigation stopped")
 
@@ -66,7 +66,7 @@ if __name__ == '__main__':
     br = tf.TransformBroadcaster()
     origin_pose = rospy.wait_for_message('local_xy_origin', PoseStamped)
     listener = tf.TransformListener()
-    turtle_vel = rospy.Publisher('cmd_vel', Twist, queue_size=10)
+    nav_cmd = rospy.Publisher('nav_cmd', Twist, queue_size=10)  # TODO: change to a Command msg instead?
     rospy.loginfo("Navigation ready")
     rospy.Subscriber('waypoint_topic', PoseStamped, handleGoal)
     rospy.spin()
