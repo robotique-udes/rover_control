@@ -7,8 +7,8 @@
     <param name="local_xy_origin" value="custom"/> <!-- setting "auto" here will set the origin to the first GPS fix that it recieves -->
     <rosparam param="local_xy_origins">
       [{ name: custom,
-         latitude: 45.49853,
-         longitude: -73.63124,
+         latitude: 45.37833584,
+         longitude: -71.9276222,
          altitude: 0.0,
          heading: 0.0}]
     </rosparam>

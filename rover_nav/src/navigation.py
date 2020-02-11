@@ -47,7 +47,7 @@ def handleGoal(data):
         rospy.logwarn("Distance to goal: %f" % distanceToGoal)
 
         # If the rover is close enough the the goal, stop navigation.
-        if distanceToGoal < 10:  # TODO: review this value
+        if distanceToGoal < 5:  # TODO: review this value
             goalReached = True
             # TODO: if we break instead of raising a flag, the last twist command won't be sent. Should we do this instead?
             rospy.loginfo("Goal Reached! Stopping navigation")

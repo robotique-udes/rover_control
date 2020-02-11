@@ -15,8 +15,8 @@ from geometry_msgs.msg import PoseStamped, Twist
 
 
 # Rovers current position in the wgs84 frame. Starting value is arbitrary.
-currentLat = 45.49851
-currentLon = -73.63121
+currentLat = 45.37834388
+currentLon = -71.92689071
 
 # Rovers current pose in the map frame, initialized to 0 (aka to the position of local_xy_origin.
 currentX = 0
@@ -38,15 +38,15 @@ def handleCmdVel(data):
     global currentLon, currentLat, currentHeading, currentX, currentY
 
     # Limit rovers linear and angular speed
-    if data.linear.x > 5:
-        data.linear.x = 5
-    if data.angular.z > 0.5:
-        data.angular.z = 0.5
+    if data.linear.x > 0.5:
+        data.linear.x = 0.5
+    if data.angular.z > 0.2:
+        data.angular.z = 0.2
 
     # Increment the rovers position in the map frame according to the twist command
     currentX += data.linear.x*(math.cos(currentHeading))
     currentY += data.linear.x*(math.sin(currentHeading))
-    currentHeading += 0.5*data.angular.z
+    currentHeading += data.angular.z
 
     # Convert the map coordinates back into wgs84 coordinates to simulate the gps data received from the new position.
     (currentLat, currentLon) = XYToWgs84(currentX, currentY)
@@ -55,7 +55,7 @@ def handleCmdVel(data):
 if __name__ == '__main__':
     rospy.init_node('rover_sim')
     br = tf.TransformBroadcaster()
-    rospy.Subscriber('cmd_vel', Twist, handleCmdVel)
+    rospy.Subscriber('nav_cmd', Twist, handleCmdVel)
     origin_pose = rospy.wait_for_message('local_xy_origin', PoseStamped)
     rospy.loginfo("rover_sim ready")
     rate = rospy.Rate(10)
