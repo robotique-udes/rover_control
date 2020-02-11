@@ -19,6 +19,7 @@
   <node pkg="rover_nav" type="pathMgr.py" name="pathMgr" />
   <node pkg="rover_nav" type="rover_sim.py" name="rover_sim" /> 
   <node pkg="rover_nav" type="navigation.py" name="navigation" />
+  <node pkg="rover_control" type="cmd_mux.py" name="cmd_mux" />
 
 
 

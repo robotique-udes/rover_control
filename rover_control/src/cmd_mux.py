@@ -4,12 +4,14 @@ import rospy
 from rover_udes.msg import Command
 from std_msgs.msg import Float32, Int32
 from sensor_msgs.msg import Joy
+from geometry_msgs.msg import Twist
 
 
 class CmdMux:
     def __init__(self):
         # By default, commands come from joystick
         self.gui_control_on = False
+        self.nav_control_on = False
         self.right_cmd = 0.0
         self.left_cmd = 0.0
         
@@ -17,6 +19,7 @@ class CmdMux:
         rospy.on_shutdown(self.on_shutdown)
         self.gui_sub = rospy.Subscriber('/gui_cmd', Command, self.gui_cmd_callback)
         self.joy_sub = rospy.Subscriber('/joy', Joy, self.joy_callback)
+        self.nav_sub = rospy.Subscriber('/nav_cmd', Twist, self.nav_cmd_callback)
 
         self.cmd_pub = rospy.Publisher('mux_cmd', Command, queue_size=1)
         rospy.Timer(rospy.Duration(1.0 / 10.0), self.publish_cmd)
@@ -34,8 +37,10 @@ class CmdMux:
             self.right_cmd = joy.axes[4] 
         else:
             self.left_cmd = 0
-            self.right_cmd = 0 
+            self.right_cmd = 0
 
+    def nav_cmd_callback(self, cmd):
+        self.right_cmd, self.left_cmd = twistToTank(cmd.linear.x, cmd.angular.z)
 
     def publish_cmd(self, event):
         cmd = Command()
@@ -46,6 +51,13 @@ class CmdMux:
 
     def on_shutdown(self):
         pass
+
+
+# Convert twist commands to tank (left and right) command
+def twistToTank(linear, angular):
+    right_cmd = linear - angular
+    left_cmd = linear + angular
+    return right_cmd, left_cmd
 
 
 if __name__ == '__main__':
