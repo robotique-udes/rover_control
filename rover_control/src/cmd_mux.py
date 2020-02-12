@@ -7,6 +7,9 @@ from sensor_msgs.msg import Joy
 from geometry_msgs.msg import Twist
 
 
+MAX_VALUE = 100
+
+
 class CmdMux:
     def __init__(self):
         # By default, commands come from joystick
@@ -40,7 +43,8 @@ class CmdMux:
             self.right_cmd = 0
 
     def nav_cmd_callback(self, cmd):
-        self.right_cmd, self.left_cmd = twistToTank(cmd.linear.x, cmd.angular.z)
+        uncapped_right, uncapped_left = twistToTank(cmd.linear.x, cmd.angular.z)
+        self.right_cmd, self.left_cmd = limitCmd(uncapped_right, uncapped_left)
 
     def publish_cmd(self, event):
         cmd = Command()
@@ -58,6 +62,20 @@ def twistToTank(linear, angular):
     right_cmd = linear - angular
     left_cmd = linear + angular
     return right_cmd, left_cmd
+
+
+# Limits right and left command from 0 to 100 while keeping the difference between the two proportional
+def limitCmd(right, left):
+    if right > MAX_VALUE or left > MAX_VALUE:
+        if right >= left:
+            capped_right = 100
+            capped_left = (left/right) * 100
+        else:
+            capped_left = 100
+            capped_right = (right / left) * 100
+        rospy.logwarn("right = %f  left = %f" % (right, left))
+        return capped_left, capped_right
+    return right, left
 
 
 if __name__ == '__main__':
