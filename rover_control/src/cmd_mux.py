@@ -8,6 +8,7 @@ from geometry_msgs.msg import Twist
 
 
 MAX_VALUE = 100
+MIN_VALUE = -100
 
 
 class CmdMux:
@@ -36,15 +37,15 @@ class CmdMux:
     def joy_callback(self, joy):
         # Left bumper acts as dead-man switch
         if (joy.buttons[4] == 1) and not self.gui_control_on:
-            self.left_cmd = joy.axes[1]
-            self.right_cmd = joy.axes[4] 
+            self.left_cmd = joy.axes[1]*100
+            self.right_cmd = joy.axes[4]*100
         else:
             self.left_cmd = 0
             self.right_cmd = 0
 
     def nav_cmd_callback(self, cmd):
-        uncapped_right, uncapped_left = twistToTank(cmd.linear.x, cmd.angular.z)
-        self.right_cmd, self.left_cmd = limitCmd(uncapped_right, uncapped_left)
+        uncapped_left, uncapped_right = twistToTank(cmd.linear.x, cmd.angular.z)
+        self.left_cmd, self.right_cmd = limitCmd(uncapped_left, uncapped_right)
 
     def publish_cmd(self, event):
         cmd = Command()
@@ -59,23 +60,22 @@ class CmdMux:
 
 # Convert twist commands to tank (left and right) command
 def twistToTank(linear, angular):
-    right_cmd = linear - angular
     left_cmd = linear + angular
-    return right_cmd, left_cmd
+    right_cmd = linear - angular
+    return left_cmd, right_cmd
 
 
-# Limits right and left command from 0 to 100 while keeping the difference between the two proportional
-def limitCmd(right, left):
-    if right > MAX_VALUE or left > MAX_VALUE:
-        if right >= left:
+# Limits right and left command from -100 to 100 while keeping the difference between the two proportional
+def limitCmd(left, right):
+    if not(MIN_VALUE < right < MAX_VALUE and MIN_VALUE < left < MAX_VALUE):
+        if abs(right) >= abs(left):
             capped_right = 100
-            capped_left = (left/right) * 100
+            capped_left = (left/abs(right)) * 100
         else:
             capped_left = 100
-            capped_right = (right / left) * 100
-        rospy.logwarn("right = %f  left = %f" % (right, left))
+            capped_right = (right/abs(left)) * 100
         return capped_left, capped_right
-    return right, left
+    return left, right
 
 
 if __name__ == '__main__':
