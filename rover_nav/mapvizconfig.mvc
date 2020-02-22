@@ -7,11 +7,11 @@ enable_antialiasing: true
 show_displays: true
 show_status_bar: true
 show_capture_tools: true
-window_width: 1920
-window_height: 974
-view_scale: 2.54476
-offset_x: 0
-offset_y: 0
+window_width: 960
+window_height: 1026
+view_scale: 0.1264088
+offset_x: -29.72067
+offset_y: 9.537202
 use_latest_transforms: true
 background: "#a0a0a4"
 displays:
@@ -47,8 +47,8 @@ displays:
       collapsed: false
       frame: rover
       image: /home/jeremie/Rover/src/rover_control/rover_nav/indigo.png
-      width: 50
-      height: 50
+      width: 5
+      height: 5
       offset_x: 0
       offset_y: 0
       ratio: custom
@@ -70,3 +70,10 @@ displays:
       visible: true
       collapsed: true
       topic: /path_marker_topic
+  - type: mapviz_plugins/coordinate_picker
+    name: new display
+    config:
+      visible: true
+      collapsed: false
+      frame: ""
+      copy: false
