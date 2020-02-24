@@ -20,6 +20,7 @@ GOAL_REACHED_DIST = 5
 GOAL_NEAR_DIST = 10
 ANGLE_TOLERANCE = math.radians(10)
 MAX_CMD = 100
+STOP_AND_TURN_ANGLE = math.radians(45)
 
 
 def handleGoal(data):
@@ -48,15 +49,13 @@ def handleGoal(data):
         x = (distX*math.cos(theta)) + (distY*math.sin(theta))
         y = (-distX*math.sin(theta)) + (distY*math.cos(theta))
 
-        # Convert to twist commands and publish
+        # Distance to goal and angle to goal
+        distanceToGoal = math.sqrt(x ** 2 + y ** 2)
+        angleToGoal = math.atan2(y, x)
+
+        # Generate Twist commands
         cmd = Twist()
-        distanceToGoal = math.sqrt(x**2 + y**2)
-        angleFromGoal = math.atan2(y, x)
-        if distanceToGoal > GOAL_REACHED_DIST:
-            cmd.linear.x = 100
-        if abs(angleFromGoal) > ANGLE_TOLERANCE:
-            cmd.angular.z = 100
-        # TODO: implement gradual acceleration and deceleration
+        cmd.linear.x, cmd.angular.z = move(distanceToGoal, angleToGoal)
         nav_cmd.publish(cmd)
 
         # If the rover is close enough the the goal, stop navigation.
@@ -67,6 +66,41 @@ def handleGoal(data):
 
         rate.sleep()
     rospy.loginfo("Navigation stopped")
+
+
+# Given a distance to goal and an angle to goal, will return twist cmds using the most appropriate drive profile
+def move(dist, angle):
+    # TODO: implement gradual acceleration and deceleration
+    if abs(angle) > STOP_AND_TURN_ANGLE:
+        linear, angular = moveStopAndTurn(angle)
+    else:
+        linear, angular = moveContinuous(dist, angle)
+    return linear, angular
+
+
+# Given an angle, will return twist cmds to turn without any linear movement
+def moveStopAndTurn(angle):
+    rospy.logwarn("moveStopAndTurn")
+    if angle > ANGLE_TOLERANCE:
+        angular = 100  # Turn counter-clockwise
+    elif angle < -ANGLE_TOLERANCE:
+        angular = -100  # Turn clockwise
+    linear = 0
+    return linear, angular
+
+
+# Given an angle and a distance to the goal, will return twist cmds to reach that goal
+def moveContinuous(dist, angle):
+    rospy.logwarn("moveContinuous")
+    if dist > GOAL_REACHED_DIST:
+        linear = 100  # Move forward
+    if angle > ANGLE_TOLERANCE:
+        angular = 100  # Turn counter-clockwise
+    elif angle < -ANGLE_TOLERANCE:
+        angular = -100  # Turn clockwise
+    else:
+        angular = 0
+    return linear, angular
 
 
 if __name__ == '__main__':
