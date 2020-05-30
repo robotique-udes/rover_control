@@ -136,7 +136,7 @@
   <gazebo>
     <plugin name="skid_steer_drive_controller" filename="libgazebo_ros_skid_steer_drive.so">
       <updateRate>100.0</updateRate>
-      <robotNamespace>/</robotNamespace>
+      <robotNamespace>/base_controller</robotNamespace>
       <leftFrontJoint>front_left_wheel</leftFrontJoint>
       <rightFrontJoint>front_right_wheel</rightFrontJoint>
       <leftRearJoint>rear_left_wheel</leftRearJoint>
@@ -178,9 +178,9 @@
       <frameId>base_link</frameId>
       <topicName>navsat/fix</topicName>
       <velocityTopicName>navsat/vel</velocityTopicName>
-      <referenceLatitude>49.9</referenceLatitude>
-      <referenceLongitude>8.9</referenceLongitude>
-      <referenceHeading>0</referenceHeading>
+      <referenceLatitude>29.45196669</referenceLatitude>
+      <referenceLongitude>-98.61370577</referenceLongitude>
+      <referenceHeading>1.57079632679</referenceHeading>
       <referenceAltitude>0</referenceAltitude>
       <drift>0.0001 0.0001 0.0001</drift>
     </plugin>

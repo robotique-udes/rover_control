@@ -9,7 +9,7 @@
 
   <group ns="$(arg robot_namespace)">
 
-    <!-- Note that rover_simulation/description.launch is already included in husky_control/control.launch. -->
+    <!-- Note that rover_simulation/description.launch is already included in rover_control/control.launch. -->
     <include file="$(find rover_control)/launch/control.launch" />
 
     <!-- Spawn robot in gazebo -->
