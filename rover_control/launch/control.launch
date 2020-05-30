@@ -1,5 +1,9 @@
 <?xml version='1.0'?>
 <launch>
-  <node name="cmd_mux" pkg="rover_control" type="cmd_mux.py" output="screen">
-  </node>
+
+  <node name="cmd_mux" pkg="rover_control" type="cmd_mux.py" output="screen" />
+
+  <!-- Load robot description -->
+  <include file="$(find rover_description)/launch/description.launch" />
+
 </launch>
