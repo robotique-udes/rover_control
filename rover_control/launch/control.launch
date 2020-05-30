@@ -3,6 +3,8 @@
 
   <node name="cmd_mux" pkg="rover_control" type="cmd_mux.py" output="screen" />
 
+  <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" />
+
   <!-- Load robot description -->
   <include file="$(find rover_description)/launch/description.launch" />
 
