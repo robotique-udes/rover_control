@@ -23,7 +23,6 @@
   <node name="navsat_transform_node" pkg="robot_localization" type="navsat_transform_node" >
     <param name="zero_altitude" value="true" />
     <param name="publish_filtered_gps" value="true" />
-    <param name="yaw_offset" value="1.57079632679" />
     <remap from="/gps/fix" to="/navsat/fix" />
     <remap from="/odometry/filtered" to="/global_ekf_localization/odom" />
   </node>
