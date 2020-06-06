@@ -1,7 +1,9 @@
 <?xml version="1.0" ?>
 <robot name="rover" xmlns:xacro="http://ros.org/wiki/xacro">
 
-   <xacro:arg name="robot_namespace" default="/" />
+  <xacro:include filename="$(find rover_description)/urdf/camera_test.urdf.xacro"/>
+
+  <xacro:arg name="robot_namespace" default="/" />
 
   <!-- TODO: adjust geometry-->
   <!-- Base size -->
@@ -72,7 +74,7 @@
   <!-- Wheel macro -->
   <xacro:macro name="wheel" params="wheel_prefix *joint_pose" >
     <link name="${wheel_prefix}_wheel_link" >
-      <inertial>
+      <inertial>#
         <mass value="2" />
 				<origin xyz="0 0 0" />
 				<inertia  ixx="0.02" ixy="0" ixz="0" iyy="0.04" iyz="0" izz="0.02" />
@@ -130,6 +132,9 @@
   <xacro:wheel wheel_prefix="rear_right">
     <origin xyz="${-wheelbase/2} ${-track/2  - wheel_length/2} ${wheel_vertical_offset}" rpy="0 0 0" />
   </xacro:wheel>
+
+  <!-- Camera -->
+  <xacro:camera_sensor name="camera1" xyz="0 0 1" hfov="1.3962634" image_width="800" image_height="600" rpy="0 0 0" parent="base_link" />
 
   <!-- gazebo plugins -->
   
