@@ -1,7 +1,8 @@
 <?xml version="1.0" ?>
 <robot name="rover" xmlns:xacro="http://ros.org/wiki/xacro">
 
-  <xacro:include filename="$(find rover_description)/urdf/camera_test.urdf.xacro"/>
+  <xacro:include filename="$(find rover_description)/urdf/camera.urdf.xacro"/>
+  <xacro:include filename="$(find rover_description)/urdf/stereo_camera.urdf.xacro"/>
 
   <xacro:arg name="robot_namespace" default="/" />
 
@@ -134,10 +135,16 @@
   </xacro:wheel>
 
   <!-- Camera -->
-  <xacro:camera_sensor name="camera1" xyz="0 0 1" hfov="1.3962634" image_width="800" image_height="600" rpy="0 0 0" parent="base_link" />
+  <xacro:camera_sensor name="camera1" parent="base_link" hfov="1.3962634" image_width="800" image_height="600"  >
+    <origin xyz="0 0 0.5" rpy="0 0 0" />
+  </xacro:camera_sensor>
+
+  <!-- Stereo camera -->
+  <xacro:stereo_camera_sensor name="stereo_camera" parent="base_link" hfov="1.3962634" image_width="800" image_height="600" camera_distance="0.1" >
+    <origin xyz="${base_x_size/2} 0 0" rpy="0 0 0" />
+  </xacro:stereo_camera_sensor>
 
   <!-- gazebo plugins -->
-  
   <gazebo>
     <plugin name="skid_steer_drive_controller" filename="libgazebo_ros_skid_steer_drive.so">
       <updateRate>100.0</updateRate>
