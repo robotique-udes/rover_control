@@ -3,6 +3,7 @@
 
   <xacro:include filename="$(find rover_description)/urdf/camera.urdf.xacro"/>
   <xacro:include filename="$(find rover_description)/urdf/stereo_camera.urdf.xacro"/>
+  <xacro:include filename="$(find rover_description)/urdf/realsense_d435.urdf.xacro" />
 
   <xacro:arg name="robot_namespace" default="/" />
 
@@ -140,9 +141,14 @@
   </xacro:camera_sensor>
 
   <!-- Stereo camera -->
-  <xacro:stereo_camera_sensor name="stereo_camera" parent="base_link" hfov="1.3962634" image_width="800" image_height="600" camera_distance="0.1" >
+  <!--<xacro:stereo_camera_sensor name="stereo_camera" parent="base_link" hfov="1.3962634" image_width="800" image_height="600" camera_distance="0.1" >
     <origin xyz="${base_x_size/2} 0 0" rpy="0 0 0" />
-  </xacro:stereo_camera_sensor>
+  </xacro:stereo_camera_sensor>-->
+
+  <!-- Intel RealSense d435 -->
+  <xacro:realsense_d435_sensor name="d435" parent="base_link" >
+    <origin xyz="${base_x_size/2} 0 ${base_z_size}" rpy="0 0 0" />
+  </xacro:realsense_d435_sensor>
 
   <!-- gazebo plugins -->
   <gazebo>
