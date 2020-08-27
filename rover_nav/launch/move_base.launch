@@ -1,12 +1,10 @@
 <launch>
 
-   <master auto="start"/>
 <!-- Run the map server -->
-<!-- <node name="map_server" pkg="map_server" type="map_server" args="$(find my_map_package)/my_map.pgm my_map_resolution"/> -->
-
+<!-- <node name="map_server" pkg="map_server" type="map_server" args="$(find rover_nav)/map_empty.pgm 0.05"/> 
+-->
  <!--- Run AMCL --> 
  <include file="$(find amcl)/examples/amcl_omni.launch" />
-
 
  <remap from="odom" to="/local_ekf_localization/odom"/>
  <remap from="cmd_vel" to="/base_controller/cmd_vel"/>
@@ -14,11 +12,11 @@
  <remap from="odom" to="/local_ekf_localization/odom"/>
 
  <node pkg="move_base" type="move_base" respawn="false" name="move_base" output="screen">
-    <rosparam file="$(find rover_nav)/maps/costmap_common_params.yaml" command="load" ns="global_costmap" /> 
-    <rosparam file="$(find rover_nav)/maps/costmap_common_params.yaml" command="load" ns="local_costmap" />
-    <rosparam file="$(find rover_nav)/maps/local_costmap_params.yaml" command="load" />
-    <rosparam file="$(find rover_nav)/maps/global_costmap_params.yaml" command="load" /> 
-    <rosparam file="$(find rover_nav)/base_local_planner_params.yaml" command="load" />
+    <rosparam file="$(find rover_nav)/config/costmap_common.yaml" command="load" ns="global_costmap" /> 
+    <rosparam file="$(find rover_nav)/config/costmap_common.yaml" command="load" ns="local_costmap" />
+    <rosparam file="$(find rover_nav)/config/costmap_local.yaml" command="load" />
+    <rosparam file="$(find rover_nav)/config/costmap_global.yaml" command="load" /> 
+    <rosparam file="$(find rover_nav)/config/planner_local.yaml" command="load" />
  </node>
 
 </launch> 
