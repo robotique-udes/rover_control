@@ -4,7 +4,7 @@
 <!-- <node name="map_server" pkg="map_server" type="map_server" args="$(find rover_nav)/map_empty.pgm 0.05"/> 
 -->
  <!--- Run AMCL --> 
- <include file="$(find amcl)/examples/amcl_omni.launch" />
+ <!-- <include file="$(find amcl)/examples/amcl_omni.launch" /> -->
 
  <remap from="odom" to="/local_ekf_localization/odom"/>
  <remap from="cmd_vel" to="/base_controller/cmd_vel"/>
