@@ -7,17 +7,22 @@
 * rover_nav: navigation configurations
 * rover_gazebo: gazebo simulation of the robot
 
+## Setup
+### Joystick/Gamepad setup
+Follow this [tutorial](http://wiki.ros.org/joy/Tutorials/ConfiguringALinuxJoystick) and in `rover_control/launch/teleop_joystick.launch` make sure the device name is correct.
+
 ## Dependencies
 
-The following packages nees to be installed in order for the rover to work properly.
+The following packages need to be installed in order for the rover to work properly. Most of them can be installed automatically with by running `rosdep install --from-paths src --ignore-src -r -y` in the root of the catkin workspace.
 
-* realsense2-camera `sudo apt install ros-meldic-realsense2-camera`
-* realsense2-description `sudo apt install ros-meldic-realsense2-description`
-* robot-localization `sudo apt install ros-meldic-robot-localization`
+* realsense2_camera `sudo apt install ros-melodic-realsense2-camera`
+* realsense2_description `sudo apt install ros-meldic-realsense2-description`
+* robot_localization `sudo apt install ros-melodic-robot-localization`
 * [mapviz](https://swri-robotics.github.io/mapviz/)
 * hector_gazebo_plugins `sudo apt install ros-meldic-hector_gazebo_plugins`
-* rviz_imu_plugin `sudo apt install ros-meldic-rviz_imu_plugin`
-* teleop_twist_joy `sudo apt install ros-meldic-teleop_twist_joy`
-* teleop_twist_keyboard `sudo apt install ros-meldic-teleop_twist_keyboard`
+* rviz_imu_plugin `sudo apt install ros-melodic-rviz_imu_plugin`
+* joy `sudo apt install ros-melodic-joy`
+* teleop_twist_joy `sudo apt install ros-melodic-teleop_twist_joy`
+* teleop_twist_keyboard `sudo apt install ros-melodic-teleop_twist_keyboard`
 * [rover_udes](https://github.com/robotique-udes/rover_udes)
 
