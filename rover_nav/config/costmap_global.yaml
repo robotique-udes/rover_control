@@ -3,5 +3,5 @@ rolling_window: true
 track_unknown_space: true
 
 plugins:
-  - {name: obstacles_rgbd,            type: "costmap_2d::ObstacleLayer"}
-  - {name: inflation,                 type: "costmap_2d::InflationLayer"}
+  - {name: obstacle_layer,            type: "costmap_2d::VoxelLayer"}
+  - {name: inflation_layer,           type: "costmap_2d::InflationLayer"}
