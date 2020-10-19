@@ -4,7 +4,7 @@
     <param name="autorepeat_rate" value="10" />
     <param name="dev" value="/dev/input/js0" />
   </node>
-  <node pkg="teleop_twist_joy" name="teleop_twist_joy" type="teleop_node" >
+  <node pkg="rover_control" name="teleop_joystick" type="teleop_joystick.py" output="screen" >
     <remap from="cmd_vel" to="base_controller/cmd_vel" />
   </node>
 </launch>
