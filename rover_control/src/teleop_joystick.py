@@ -34,8 +34,8 @@ class TeleopJoystick():
                 twist.linear.x *= self.linear_scaling 
                 self.cmd_pub.publish(twist)
         else:
-            twist.angular.z = 0.0
-            twist.linear.x = 0.0
+            twist.angular.z = 0
+            twist.linear.x = 0
             self.cmd_pub.publish(twist)
         
 
