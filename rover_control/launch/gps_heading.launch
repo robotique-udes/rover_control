@@ -1,0 +1,4 @@
+<launch>
+    <node pkg="rover_control" type="gps_heading.py" name="gps_heading" output="screen" >
+    </node>
+</launch>
