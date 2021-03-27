@@ -1,4 +1,8 @@
 <launch>
     <node pkg="rover_control" type="gps_heading.py" name="gps_heading" output="screen" >
+        <param name="publishing_rate" value="10"/>
+        <param name="min_distance" value="3"/>  <!-- Min distance vector length to calculate gps heading -->
+        <param name="base_frame" value="base_link"/>
+        <param name="gps_positions_queue_length" value="5" />  <!-- Number of the most recent GPS positions to keep in memory -->
     </node>
 </launch>

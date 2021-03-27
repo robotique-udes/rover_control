@@ -18,24 +18,30 @@ class GpsHeading():
         self.heading_pub = rospy.Publisher('/gps_heading', Imu, queue_size=1)
 
         # Parameters
-        self.publishing_rate = 10  # Hz
-        self.min_distance = 3  # TODO: ROS parameter
-        self.base_frame = "base_link"
-        self.gps_positions_queue_length = 5  # Newest positions are added on the left, oldest positions are on the right
-        self.orientation_covariance = [0.1, 0, 0, \
-                                       0, 0.1, 0, \
-                                       0, 0, 0.1]  # TODO: use better covariance values
+        self.publishing_rate = rospy.get_param("~publishing_rate", 10)  # Hz
+        self.min_distance = rospy.get_param("~min_distance", 3)  # TODO: ROS parameter
+        self.base_frame = rospy.get_param("~base_frame", "base_link")
+        self.gps_positions_queue_length = rospy.get_param("~gps_positions_queue_length", 5)  # Newest positions are added on the left, oldest positions are on the right
+        self.orientation_covariance = [2.6030820491461885e-07, 0.0, 0.0, \
+                                       0.0, 2.6030820491461885e-07, 0.0, \
+                                       0.0, 0.0, 0.0]  # TODO: use better covariance values
 
-        # Member variables
+        # GPS variables
         self.gps_position_queue = deque(maxlen=self.gps_positions_queue_length)
         self.latest_gps_heading = 0
-        self.heading_msg = Imu()
+        self.got_first_gps_heading = False
+        self.previous_gps_heading = 0
+        self.gps_heading_has_converged = False  # Only switch to GPS heading once it has converged
+        self.gps_heading_epsilon = rospy.get_param("~gps_heading_epsilon", 0.0523599)  # Maximum difference in radians between the current gps heading and previous gps heading to consider the heading converged
 
+        # IMU variable
         self.got_first_imu_orientation = False
         self.previous_imu_orientation = Quaternion()
         self.relative_yaw = 0
         self.latest_imu_euler_orientation = [0, 0, 0]
 
+        # Other variables
+        self.heading_msg = Imu()
         self.mutex = Lock()  # Mutex is used because the two callbacks run in their own thread but they use shared data
 
         # Initialization process
@@ -47,9 +53,11 @@ class GpsHeading():
             r = rospy.Rate(self.publishing_rate)
             while not rospy.is_shutdown():
                 self.mutex.acquire()
-                self.heading_msg.header.stamp = rospy.Time.now()
-                self.heading_pub.publish(self.heading_msg)
-                self.mutex.release()
+                try:
+                    self.heading_msg.header.stamp = rospy.Time.now()
+                    self.heading_pub.publish(self.heading_msg)
+                finally:
+                    self.mutex.release()
                 r.sleep()
         except rospy.exceptions.ROSInterruptException:
             pass
@@ -75,12 +83,14 @@ class GpsHeading():
         absolute_quaternion_orientation = quaternion_from_euler(current_imu_euler_orientation[0], current_imu_euler_orientation[1], absolute_yaw)
 
         self.mutex.acquire()
-        self.latest_imu_euler_orientation = current_imu_euler_orientation
-        self.heading_msg.orientation.x = absolute_quaternion_orientation[0]
-        self.heading_msg.orientation.y = absolute_quaternion_orientation[1]
-        self.heading_msg.orientation.z = absolute_quaternion_orientation[2]
-        self.heading_msg.orientation.w = absolute_quaternion_orientation[3]
-        self.mutex.release()
+        try:
+            self.latest_imu_euler_orientation = current_imu_euler_orientation
+            self.heading_msg.orientation.x = absolute_quaternion_orientation[0]
+            self.heading_msg.orientation.y = absolute_quaternion_orientation[1]
+            self.heading_msg.orientation.z = absolute_quaternion_orientation[2]
+            self.heading_msg.orientation.w = absolute_quaternion_orientation[3]
+        finally:
+            self.mutex.release()
         # Rest of IMU msg is left empty since we only care about the orientation
 
         self.previous_imu_orientation = msg.orientation
@@ -99,21 +109,37 @@ class GpsHeading():
             distance = sqrt(dx**2 + dy**2)
 
             if distance > self.min_distance:
-                self.mutex.acquire()
-                self.latest_gps_heading = atan2(dy, dx) 
-                quaternion_orientation = quaternion_from_euler(self.latest_imu_euler_orientation[0],  self.latest_imu_euler_orientation[1], \
-                                                               self.latest_gps_heading)
+                print("Min distance met")
+                yaw = atan2(dy, dx)
+                if not self.got_first_gps_heading:
+                    print("Got first gps heading")
+                    self.previous_gps_heading = yaw
+                    self.got_first_gps_heading = True
+                    return
+                print("Before yaw diff")
+                yaw_diff_from_previous = abs(yaw - self.previous_gps_heading)
+                print("Yaw difference = %f" % yaw_diff_from_previous)
+                if yaw_diff_from_previous <= self.gps_heading_epsilon:
+                    self.mutex.acquire()
+                    try:
+                        print("GPS heading converged")
+                        # Only use/update GPS heading if it has converged (aka the robot is going moving in a straight line). Otherwise, use IMU
+                        self.latest_gps_heading = yaw 
+                        quaternion_orientation = quaternion_from_euler(self.latest_imu_euler_orientation[0],  self.latest_imu_euler_orientation[1], \
+                                                                    self.latest_gps_heading)
 
-                self.heading_msg.orientation.x = quaternion_orientation[0]
-                self.heading_msg.orientation.y = quaternion_orientation[1]
-                self.heading_msg.orientation.z = quaternion_orientation[2]
-                self.heading_msg.orientation.w = quaternion_orientation[3]      
-                # Rest of IMU msg is left empty since we only care about the orientation
+                        self.heading_msg.orientation.x = quaternion_orientation[0]
+                        self.heading_msg.orientation.y = quaternion_orientation[1]
+                        self.heading_msg.orientation.z = quaternion_orientation[2]
+                        self.heading_msg.orientation.w = quaternion_orientation[3]     
+                        # Rest of IMU msg is left empty since we only care about the orientation
 
-                self.relative_yaw = 0  # Reset relative yaw since a new gps heading has arrived
-                print("new gps heading")  
-                self.mutex.release()
-
+                        self.relative_yaw = 0  # Reset relative yaw since a new gps heading has arrived
+                        print("new gps heading")
+                    finally:
+                        self.mutex.release()
+                
+                self.previous_gps_heading = yaw
                 break
         self.gps_position_queue.appendleft(msg.pose.pose.position)
 
