@@ -3,8 +3,9 @@
 import rospy
 from nav_msgs.msg import Odometry
 from sensor_msgs.msg import Imu
-from geometry_msgs.msg import Pose, Quaternion
+from geometry_msgs.msg import Pose, Quaternion, QuaternionStamped
 from math import sqrt, atan2, pi
+from tf import TransformListener
 from tf.transformations import quaternion_from_euler, euler_from_quaternion
 from collections import deque
 from threading import Lock
@@ -16,6 +17,7 @@ class GpsHeading():
         self.gps_sub = rospy.Subscriber('/odometry/gps', Odometry, self.gpsCB)
         self.imu_sub = rospy.Subscriber('/imu/data', Imu, self.imuCB)
         self.heading_pub = rospy.Publisher('/gps_heading', Imu, queue_size=1)
+        self.tf = TransformListener()
 
         # Parameters
         self.publishing_rate = rospy.get_param("~publishing_rate", 10)  # Hz
@@ -65,17 +67,20 @@ class GpsHeading():
             pass
             
     def imuCB(self, msg):
+        quat = QuaternionStamped()
+        quat.header = msg.header
+        quat.quaternion = msg.orientation
+        transformed_quat = self.tf.transformQuaternion(self.base_frame, quat)
+
         if not self.got_first_imu_orientation:
-            self.previous_imu_orientation = msg.orientation
+            self.previous_imu_orientation = transformed_quat.quaternion
             self.got_first_imu_orientation = True
             return
-
-        # TODO: transform to base frame first
 
         # Get yaw difference between current yaw and previous yaw
         previous_imu_quaternion_orientation = [self.previous_imu_orientation.x, self.previous_imu_orientation.y, \
                                               self.previous_imu_orientation.z, self.previous_imu_orientation.w]
-        current_imu_quaternion_orientation = [msg.orientation.x, msg.orientation.y, msg.orientation.z, msg.orientation.w]
+        current_imu_quaternion_orientation = [transformed_quat.quaternion.x, transformed_quat.quaternion.y, transformed_quat.quaternion.z, transformed_quat.quaternion.w]
 
         previous_imu_euler_orientation = euler_from_quaternion(previous_imu_quaternion_orientation)
         current_imu_euler_orientation = euler_from_quaternion(current_imu_quaternion_orientation)
@@ -97,7 +102,7 @@ class GpsHeading():
             self.mutex.release()
         # Rest of IMU msg is left empty since we only care about the orientation
 
-        self.previous_imu_orientation = msg.orientation
+        self.previous_imu_orientation = transformed_quat.quaternion
 
 
     def gpsCB(self, msg):
@@ -106,7 +111,7 @@ class GpsHeading():
         # positions in a queue, we can calculate more frequently because one of the few previous positions is bound
         # to be the threshold distance away already.
 
-        # TODO: transform to base frame first
+        # Since GPS is only accurate to the order of a few meters, it is unnecessary to transform it in the base frame
 
         for position in self.gps_position_queue:
             # Starting from the most recent previous position, find a previous position that is
@@ -118,17 +123,17 @@ class GpsHeading():
             if distance > self.min_distance:
                 yaw = atan2(dy, dx)
                 if not self.got_first_gps_heading:
-                    print("Got first gps heading")
+                    rospy.loginfo("Got first gps heading")
                     self.previous_gps_heading = yaw
                     self.got_first_gps_heading = True
                     return
                 yaw_diff_from_previous = abs(yaw - self.previous_gps_heading)
                 if yaw_diff_from_previous <= self.gps_heading_epsilon:
-                    print("GPS heading converged")
+                    rospy.loginfo("GPS heading converged")
                     self.mutex.acquire()
                     try:
                         if abs(self.relative_yaw) <= self.gps_heading_epsilon or self.nb_of_heading_disagreements >= self.max_nb_of_heading_disagreements:
-                            print("Correcting IMU heading with GPS heading")
+                            rospy.loginfo("Correcting IMU heading with GPS heading")
                             self.nb_of_heading_disagreements = 0
                             # Only use/update GPS heading if it has converged (aka the robot is going moving in a straight line). Otherwise, use IMU
                             self.latest_gps_heading = yaw 
@@ -144,7 +149,7 @@ class GpsHeading():
                             self.relative_yaw = 0  # Reset relative yaw since a new gps heading has arrived
                         else:
                             self.nb_of_heading_disagreements += 1
-                            print("Heading disagreement number %d" % self.nb_of_heading_disagreements)
+                            rospy.loginfo("Heading disagreement number %d" % self.nb_of_heading_disagreements)
                     finally:
                         self.mutex.release()
                 
