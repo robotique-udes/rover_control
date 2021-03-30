@@ -18,3 +18,4 @@ Because of that, accurate GPS headings are infrequent and can't be used alone. T
 * ~base_frame(string, default: "base_link") Name of the robot's base frame
 * ~gps_positions_queue_length(int, default: 5) Number of the most recent GPS positions to keep in memory
 * ~gps_heading_epsilon(float, default: 0.0523599) Maximum difference in radians between the current gps heading and previous gps heading to consider the heading converged
+* ~max_nb_of_heading_disagreements(int, default: 3) Number of times a disagreement between the IMU heading and the GPS heading will be tolerated before a correction is forced.

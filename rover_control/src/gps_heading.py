@@ -33,12 +33,14 @@ class GpsHeading():
         self.previous_gps_heading = 0
         self.gps_heading_has_converged = False  # Only switch to GPS heading once it has converged
         self.gps_heading_epsilon = rospy.get_param("~gps_heading_epsilon", 0.0523599)  # Maximum difference in radians between the current gps heading and previous gps heading to consider the heading converged
+        self.nb_of_heading_disagreements = 0  # Number of converged GPS headings that have been calculated since the IMU heading was last corrected
 
         # IMU variable
         self.got_first_imu_orientation = False
         self.previous_imu_orientation = Quaternion()
         self.relative_yaw = 0
         self.latest_imu_euler_orientation = [0, 0, 0]
+        self.max_nb_of_heading_disagreements = rospy.get_param("~max_nb_of_heading_disagreements", 3)  # Number of times a disagreement between the IMU heading and the GPS heading will be tolerated before a correction is forced.
 
         # Other variables
         self.heading_msg = Imu()
@@ -68,6 +70,8 @@ class GpsHeading():
             self.got_first_imu_orientation = True
             return
 
+        # TODO: transform to base frame first
+
         # Get yaw difference between current yaw and previous yaw
         previous_imu_quaternion_orientation = [self.previous_imu_orientation.x, self.previous_imu_orientation.y, \
                                               self.previous_imu_orientation.z, self.previous_imu_orientation.w]
@@ -76,9 +80,9 @@ class GpsHeading():
         previous_imu_euler_orientation = euler_from_quaternion(previous_imu_quaternion_orientation)
         current_imu_euler_orientation = euler_from_quaternion(current_imu_quaternion_orientation)
 
-        self.relative_yaw += limit_angles_pi(current_imu_euler_orientation[2] - previous_imu_euler_orientation[2])
-        self.relative_yaw = limit_angles_pi(self.relative_yaw)
-        absolute_yaw = limit_angles_pi(self.relative_yaw + self.latest_gps_heading)
+        self.relative_yaw += wrap_angle_pi(current_imu_euler_orientation[2] - previous_imu_euler_orientation[2])
+        self.relative_yaw = wrap_angle_pi(self.relative_yaw)
+        absolute_yaw = wrap_angle_pi(self.relative_yaw + self.latest_gps_heading)
 
         absolute_quaternion_orientation = quaternion_from_euler(current_imu_euler_orientation[0], current_imu_euler_orientation[1], absolute_yaw)
 
@@ -101,6 +105,9 @@ class GpsHeading():
         # travel the entire threshold distance before a new heading can be calculated. If we save multiple previous 
         # positions in a queue, we can calculate more frequently because one of the few previous positions is bound
         # to be the threshold distance away already.
+
+        # TODO: transform to base frame first
+
         for position in self.gps_position_queue:
             # Starting from the most recent previous position, find a previous position that is
             # farther than the minimum distance threshold
@@ -109,33 +116,35 @@ class GpsHeading():
             distance = sqrt(dx**2 + dy**2)
 
             if distance > self.min_distance:
-                print("Min distance met")
                 yaw = atan2(dy, dx)
                 if not self.got_first_gps_heading:
                     print("Got first gps heading")
                     self.previous_gps_heading = yaw
                     self.got_first_gps_heading = True
                     return
-                print("Before yaw diff")
                 yaw_diff_from_previous = abs(yaw - self.previous_gps_heading)
-                print("Yaw difference = %f" % yaw_diff_from_previous)
                 if yaw_diff_from_previous <= self.gps_heading_epsilon:
+                    print("GPS heading converged")
                     self.mutex.acquire()
                     try:
-                        print("GPS heading converged")
-                        # Only use/update GPS heading if it has converged (aka the robot is going moving in a straight line). Otherwise, use IMU
-                        self.latest_gps_heading = yaw 
-                        quaternion_orientation = quaternion_from_euler(self.latest_imu_euler_orientation[0],  self.latest_imu_euler_orientation[1], \
-                                                                    self.latest_gps_heading)
+                        if abs(self.relative_yaw) <= self.gps_heading_epsilon or self.nb_of_heading_disagreements >= self.max_nb_of_heading_disagreements:
+                            print("Correcting IMU heading with GPS heading")
+                            self.nb_of_heading_disagreements = 0
+                            # Only use/update GPS heading if it has converged (aka the robot is going moving in a straight line). Otherwise, use IMU
+                            self.latest_gps_heading = yaw 
+                            quaternion_orientation = quaternion_from_euler(self.latest_imu_euler_orientation[0],  self.latest_imu_euler_orientation[1], \
+                                                                        self.latest_gps_heading)
 
-                        self.heading_msg.orientation.x = quaternion_orientation[0]
-                        self.heading_msg.orientation.y = quaternion_orientation[1]
-                        self.heading_msg.orientation.z = quaternion_orientation[2]
-                        self.heading_msg.orientation.w = quaternion_orientation[3]     
-                        # Rest of IMU msg is left empty since we only care about the orientation
+                            self.heading_msg.orientation.x = quaternion_orientation[0]
+                            self.heading_msg.orientation.y = quaternion_orientation[1]
+                            self.heading_msg.orientation.z = quaternion_orientation[2]
+                            self.heading_msg.orientation.w = quaternion_orientation[3]     
+                            # Rest of IMU msg is left empty since we only care about the orientation
 
-                        self.relative_yaw = 0  # Reset relative yaw since a new gps heading has arrived
-                        print("new gps heading")
+                            self.relative_yaw = 0  # Reset relative yaw since a new gps heading has arrived
+                        else:
+                            self.nb_of_heading_disagreements += 1
+                            print("Heading disagreement number %d" % self.nb_of_heading_disagreements)
                     finally:
                         self.mutex.release()
                 
@@ -144,13 +153,9 @@ class GpsHeading():
         self.gps_position_queue.appendleft(msg.pose.pose.position)
 
 
-def limit_angles_pi(angle):
-    # Limit an angle in radians to -pi : pi
-    if angle > pi:
-        angle = (angle%(2*pi)) - 2*pi
-    elif angle < -pi:
-        angle = 2*pi + (angle%(-2*pi))
-    return angle
+def wrap_angle_pi(angle):
+    # Wraps an angle in radians to -pi : pi
+    return (angle + pi) % (2 * pi) - pi
 
 
 if __name__ == '__main__':

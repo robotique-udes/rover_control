@@ -1,8 +1,9 @@
 <launch>
     <node pkg="rover_control" type="gps_heading.py" name="gps_heading" output="screen" >
-        <param name="publishing_rate" value="10"/>
+        <param name="publishing_rate" value="100"/>
         <param name="min_distance" value="3"/>  <!-- Min distance vector length to calculate gps heading -->
         <param name="base_frame" value="base_link"/>
         <param name="gps_positions_queue_length" value="5" />  <!-- Number of the most recent GPS positions to keep in memory -->
+        <param name="max_nb_of_heading_disagreements" value="3" />  <!-- Number of times a disagreement between the IMU heading and the GPS heading will be tolerated before a correction is forced. -->
     </node>
 </launch>
