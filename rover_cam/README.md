@@ -23,10 +23,3 @@ Contains Services :
 		bool active	#True : enable filter / False : disable filter
 		---
 		bool result	#True : filter active / False : filter inactive
-		
- 
-## To install Hugin panorama
-
-    $ sudo add-apt-repository ppa:ubuntuhandbook1/apps
-    $ sudo apt update
-    $ sudo apt install hugin

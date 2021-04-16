@@ -1,4 +1,5 @@
-<package>
+<?xml version="1.0"?>
+<package format="2">
   <name>hugin_panorama</name>
   <version>0.1.0</version>
   <description>
@@ -11,20 +12,14 @@
   <url type="repository">https://github.com/danielsnider/hugin_panorama</url>
 
   <buildtool_depend>catkin</buildtool_depend>
-  <build_depend>rospy</build_depend>
-  <build_depend>std_srvs</build_depend>
-  <build_depend>sensor_msgs</build_depend>
-  <build_depend>image_view</build_depend>
-  <build_depend>cv_bridge</build_depend>
-  <run_depend>rospy</run_depend>
-  <run_depend>python-rospkg</run_depend>
-  <run_depend>std_srvs</run_depend>
-  <run_depend>sensor_msgs</run_depend>
-  <run_depend>image_view</run_depend>
-  <run_depend>cv_bridge</run_depend>
-  <run_depend>python-opencv</run_depend>
-  <run_depend>hugin-tools</run_depend>
-  <run_depend>enblend</run_depend>
-  <run_depend>imagemagick</run_depend>
+  <depend>rospy</depend>
+  <depend>std_srvs</depend>
+  <depend>sensor_msgs</depend>
+  <depend>image_view</depend>
+  <depend>cv_bridge</depend>
+  <depend>python-opencv</depend>
+  <depend>hugin-tools</depend>
+  <depend>enblend</depend>
+  <depend>imagemagick</depend>
 
 </package>

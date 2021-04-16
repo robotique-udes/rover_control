@@ -6,7 +6,7 @@ find_package(catkin REQUIRED
     rospy
     std_msgs
     sensor_msgs
-    actionlib
+    cv_bridge
     std_srvs
 )
 

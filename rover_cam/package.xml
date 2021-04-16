@@ -15,8 +15,8 @@
   <depend>rospy</depend>
   <depend>std_msgs</depend>
   <depend>sensor_msgs</depend>
-  <depend>std_srvs</depend>
-  <depend>action_lib</depend>
+  <depend>python-opencv</depend>
+  <depend>cv_bridge</depend>
 
   <!-- The export tag contains other, unspecified, tags -->
   <export>
