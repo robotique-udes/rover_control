@@ -8,9 +8,7 @@ import rospy
 from std_msgs.msg import Bool
 from sensor_msgs.msg import Image
 import os
-import roslib
 import cv2
-import rospkg
 import subprocess
 from cv_bridge import CvBridge, CvBridgeError
 from std_srvs.srv import SetBool, SetBoolResponse
