@@ -4,7 +4,7 @@ import rostopic
 from rostopic import ROSTopicHz
 from diagnostic_updater import *
 import diagnostic_msgs
-from std_msgs.msg import Float32, Int32
+from std_msgs.msg import Float32, Int32, Int16
 
 
 class FrequencyStatus(DiagnosticTask):
@@ -45,7 +45,7 @@ class FrequencyStatus(DiagnosticTask):
             curtime = rospy.Time.now()
             curseq = self.count
             events = curseq - self.seq_nums[self.hist_indx]
-            window = (curtime - self.times[self.hist_indx]).to_sec()
+            window = (curtime - self.times[self.hist_indx]).to_sec() + 0.0001
             freq = events / window
             self.seq_nums[self.hist_indx] = curseq
             self.times[self.hist_indx] = curtime
@@ -77,9 +77,27 @@ class FrequencyStatus(DiagnosticTask):
 
         return stat
 
+class Emergency_stop:
+
+    def __init__(self):
+        #Subscribed to heartbeat topic
+        self.Status_sub = rospy.Subscriber('/heartbeat', Int16, self.E_STOP_CB, queue_size=1 )
+        
+
+    def E_STOP_CB(self, status):
+        print(type(status))
+        
+        if status == 0:
+            print('status is good')
+        elif status == 1:
+            print('E_STOP')
+        else:
+            print('Status unknown')
+        
 
 if __name__ == '__main__':
     rospy.init_node("sensor_check")
+<<<<<<< Updated upstream
     # Wait for the ROS clock to be initialized
 
     r = rospy.Rate(100)
@@ -87,18 +105,30 @@ if __name__ == '__main__':
         r.sleep
         
     nb_sensors = int(rospy.get_param("~nb_sensors", 0))
+=======
+    #print("created node : sensor_check")
+    #if rospy.has_param('~nb_sensors'):
+        #print("found param")
+
+    nb_sensors = int(rospy.get_param('~nb_sensors', 0))
+    
+>>>>>>> Stashed changes
     updaters = []
     pkg_name = rospy.get_name()
 
+    #print(nb_sensors)
+
     for i in range(1, nb_sensors + 1):
         name = ('~' + pkg_name + '/sensor_' + str(i))
-        
+
         # sensor parameters
         path = str(rospy.get_param((name + '/name'), ''))
         sensor_id = str(rospy.get_param((name + '/sensor_id'), ''))
         topic = str(rospy.get_param((name + '/topic'), ''))
         min_freq = float(rospy.get_param((name + '/min_freq'), ''))
         max_freq = float(rospy.get_param((name + '/max_freq'), ''))
+
+        #print("Got" + topic)
 
         updater = Updater()
         updater.setHardwareID(sensor_id)
@@ -113,6 +143,8 @@ if __name__ == '__main__':
         # immediate update.
         updater.force_update()
         updaters.append(updater)
+
+    E_stop = Emergency_stop()
 
     while not rospy.is_shutdown():
         rospy.sleep(0.1)
