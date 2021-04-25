@@ -85,11 +85,11 @@ class Emergency_stop:
         
 
     def E_STOP_CB(self, status):
-        print(type(status))
+        #print(type(status.data))
         
-        if status == 0:
+        if status.data == 0:
             print('status is good')
-        elif status == 1:
+        elif status.data == 1:
             print('E_STOP')
         else:
             print('Status unknown')
@@ -97,7 +97,6 @@ class Emergency_stop:
 
 if __name__ == '__main__':
     rospy.init_node("sensor_check")
-<<<<<<< Updated upstream
     # Wait for the ROS clock to be initialized
 
     r = rospy.Rate(100)
@@ -105,14 +104,6 @@ if __name__ == '__main__':
         r.sleep
         
     nb_sensors = int(rospy.get_param("~nb_sensors", 0))
-=======
-    #print("created node : sensor_check")
-    #if rospy.has_param('~nb_sensors'):
-        #print("found param")
-
-    nb_sensors = int(rospy.get_param('~nb_sensors', 0))
-    
->>>>>>> Stashed changes
     updaters = []
     pkg_name = rospy.get_name()
 
