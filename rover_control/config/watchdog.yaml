@@ -9,7 +9,7 @@ sensor_1:
 sensor_2:
   name: depth_camera
   sensor_id: depth_camera
-  topic: /d435/depth/points
+  topic: /d435/depth/color/points
   max_freq: 20
   min_freq: 10
 

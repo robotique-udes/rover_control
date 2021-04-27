@@ -126,7 +126,7 @@ if __name__ == '__main__':
 
         # Diagnostic tasks are added to the Updater. They will later be run when
         # the updater decides to update.
-        param = FrequencyStatusParam({'min': min_freq, 'max': max_freq})
+        param = FrequencyStatusParam({'min': min_freq, 'max': max_freq}, tolerance=0, window_size=20)
         freq_check = FrequencyStatus(path, param, topic, sensor_id)
         updater.add(freq_check)
 
@@ -135,7 +135,7 @@ if __name__ == '__main__':
         updater.force_update()
         updaters.append(updater)
 
-    E_stop = Emergency_stop()
+    #E_stop = Emergency_stop()
 
     while not rospy.is_shutdown():
         rospy.sleep(0.1)
