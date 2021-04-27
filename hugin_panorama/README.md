@@ -1,15 +1,14 @@
-# hugin_panorama [![Build Status](http://build.ros.org/buildStatus/icon?job=Kbin_uX64__hugin_panorama__ubuntu_xenial_amd64__binary)](http://build.ros.org/job/Kbin_uX64__hugin_panorama__ubuntu_xenial_amd64__binary)
+# hugin_panorama
+Fork of hugin_panorama
 
-Create panoramas in ROS using image snapshots or multiple video streams.
+## Dependencies
+* `pip install piexif`
+* sudo apt-get install ros-melodic-hugin-panorama hugin-tools enblend
 
-![hugin_panorama](http://wiki.ros.org/hugin_panorama?action=AttachFile&do=get&target=pano_by_senza_senso.JPG)
-
-Panorama by [Senza Senso](https://www.flickr.com/photos/mesec/25814467750/) (cc).
-
-## Installation
-
-```
-$ sudo apt-get install ros-kinetic-hugin-panorama hugin-tools enblend
-```
-
-**Full documentation on wiki: [http://wiki.ros.org/hugin_panorama](http://wiki.ros.org/hugin_panorama)**
+# How to use
+1. Change the image topic in hugin_panorama.launch
+2. Launch with `roslaunch hugin_panorma hugin_panorama.launch`
+3. Make sure your camera node is running
+4. Take a pictures with `rosservice call /hugin_panorama/save_image`
+5. Stitch the panorama with `rosservice call /hugin_panorama/stitch`
+6. By default, the images will be saved in hugin_panorama/image/<timestamp_of_first_image>

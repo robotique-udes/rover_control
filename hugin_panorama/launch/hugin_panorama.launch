@@ -1,14 +1,12 @@
 <launch>
   <env name="ROSCONSOLE_FORMAT" value="[${severity}][${thread}][${node}/${function}:${line}]: ${message}"/>
 
-  <arg name="image" default="/camera1/image_raw"/>
-  <arg name="images_path" default="$(find hugin_panorama)/images"/>
+  <arg name="camera_name" default="camera1" />
 
-  <group ns="hugin_panorama">
-    <node pkg="hugin_panorama" type="hugin_panorama" name="hugin_panorama" output="screen">
-      <remap from="panorama/compressed" to="panorama/compressed" />
-      <remap from="image" to="$(arg image)" />
-      <param name="images_path" value="$(arg images_path)"/>
-    </node>
-  </group>
+  <node pkg="hugin_panorama" type="hugin_panorama" name="hugin_panorama" output="screen">
+    <remap from="panorama/compressed" to="panorama/compressed" />
+    <remap from="image" to="/$(arg camera_name)/image_raw" />
+    <remap from="camera_info" to="/$(arg camera_name)/camera_info" />
+    <param name="images_path" value="$(find hugin_panorama)/images"/>
+  </node>
 </launch>

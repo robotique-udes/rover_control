@@ -6,7 +6,8 @@ import shutil
 import subprocess
 import cv2
 import rospy
-from sensor_msgs.msg import CompressedImage, Image
+import piexif
+from sensor_msgs.msg import CompressedImage, Image, CameraInfo
 from cv_bridge import CvBridge, CvBridgeError
 from std_srvs.srv import Empty
 from datetime import datetime
@@ -28,6 +29,7 @@ class HuginPanorama():
     self.output_image_name = "output"
     self.image_counter = 1
     self.bridge = CvBridge()
+    self.camera_info = None
 
     # Get the path to where input and output images for the panorama are stored
     self.images_path = rospy.get_param('~images_path')
@@ -38,11 +40,12 @@ class HuginPanorama():
 
     rospy.loginfo('Using working directory: %s'% self.images_path)
 
-    rospy.Service('stitch', Empty, self.stitch_callback)
-    rospy.Service('reset', Empty,  self.reset_callback)
-    rospy.Service('save_image', Empty, self.save_image_callback)
+    rospy.Service('~stitch', Empty, self.stitch_callback)
+    rospy.Service('~reset', Empty,  self.reset_callback)
+    rospy.Service('~save_image', Empty, self.save_image_callback)
     rospy.Subscriber('image', Image, self.image_callback)
-    self.publisher = rospy.Publisher('panorama/compressed', CompressedImage, queue_size=10)  # FIXME: need non compressed topic to publish compressed
+    rospy.Subscriber('camera_info', CameraInfo, self.camera_info_callback)
+    self.publisher = rospy.Publisher('panorama/compressed', Image, queue_size=10)  # FIXME: need non compressed topic to publish compressed
 
   def get_date_time_stamp(self):
     # Get date and time stamp in a formated string
@@ -84,13 +87,50 @@ class HuginPanorama():
         # Convert your ROS Image message to OpenCV2
         cv2_img = self.bridge.imgmsg_to_cv2(msg, "bgr8")
         # Save your OpenCV2 image as a jpeg 
-        name = "%s/%s/%03d.%s" % (self.images_path, self.image_subfolder, self.image_counter, 'png')
-        cv2.imwrite(name, cv2_img)
+        name = "%s/%s/%03d" % (self.images_path, self.image_subfolder, self.image_counter)
+        image_name = name + ".jpg"
+        camera_info_name = name + ".ini"
+        cv2.imwrite(image_name, cv2_img)
+        self.save_camera_info(camera_info_name)
         rospy.loginfo("Image saved to %s" % name)
+        exif_ifd = {piexif.ExifIFD.FocalLength: (35, 1)}
+        exif_dict = {"0th": {}, "Exif": exif_ifd, "1st": {},
+             "thumbnail": None, "GPS": {}}
+        exif_bytes = piexif.dump(exif_dict)
+        piexif.insert(exif_bytes, image_name)
         self.image_counter += 1
       except CvBridgeError, e:
           print(e)
       self.take_pic = False
+
+  def save_camera_info(self, path):
+    with open(path, 'w') as f:
+      f.write("# Camera intrinsics\n\n")
+      f.write("[image]\n\n")
+      f.write("width\n%d\n\n" % self.camera_info.width)
+      f.write("height\n%d\n\n" % self.camera_info.height)
+      f.write("[camera]\n\n")
+      f.write("camera matrix\n")
+      for i in range(3):
+        for j in range(3):
+          f.write("%.5f " % self.camera_info.K[(i*3)+j])
+        f.write("\n")
+      f.write("\ndistortion\n")
+      for i in range(5):  # FIXME: this only works for the plum_bob distortion model
+        f.write("%.5f " % self.camera_info.D[i])
+      f.write("\n\n\nrectification\n")
+      for i in range(3):
+        for j in range(3):
+          f.write("%.5f " % self.camera_info.R[(i*3)+j])
+        f.write("\n")
+      f.write("\nprojection\n")
+      for i in range(3):
+        for j in range(4):
+          f.write("%.5f " % self.camera_info.P[i*4+j])
+        f.write("\n")
+
+  def camera_info_callback(self, msg):
+    self.camera_info = msg
 
   def get_image_filenames(self):
     """ returns space seperated list of files in the images_path """
@@ -121,7 +161,7 @@ class HuginPanorama():
     # stitch
     self.bash_exec('hugin_executor --stitching --prefix=output pano.pto')
     # compress
-    self.bash_exec('convert %s.tif %s.png' % (self.output_image_name, self.output_image_name))
+    self.bash_exec('convert %s.tif %s.jpg' % (self.output_image_name, self.output_image_name))
 
     output_file = os.path.join(self.image_subfolder_path, self.output_image_name)
     if not os.path.isfile(output_file):
@@ -140,11 +180,11 @@ class HuginPanorama():
 
   def cleanup(self, delete_images=False):
     # Hugin project files and output images
-    files_to_be_deleted = ['%s.tif' % self.output_image_name, "%s.png" % self.output_image_name, 'pano.pto']
+    files_to_be_deleted = ['%s.tif' % self.output_image_name, "%s.jpg" % self.output_image_name, 'pano.pto']
 
     # Optionally delete images
     if delete_images:
-      image_types = ('*.png', '*.jpg', '*.gif')
+      image_types = ('*.jpg', '*.jpg', '*.gif')
       for file_type in image_types:
         path = os.path.join(self.output_image_name,file_type)
         files_to_be_deleted.extend(glob.glob(path))
