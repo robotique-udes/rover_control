@@ -4,7 +4,8 @@ import rostopic
 from rostopic import ROSTopicHz
 from diagnostic_updater import *
 import diagnostic_msgs
-from std_msgs.msg import Float32, Int32, Int16
+from std_msgs.msg import Float32, Int32, Int16 
+from geometry_msgs.msg import Twist
 
 
 class FrequencyStatus(DiagnosticTask):
@@ -77,22 +78,24 @@ class FrequencyStatus(DiagnosticTask):
 
         return stat
 
-class Emergency_stop:
+class Emergency_stop(int):
 
     def __init__(self):
-        #Subscribed to heartbeat topic
-        self.Status_sub = rospy.Subscriber('/heartbeat', Int16, self.E_STOP_CB, queue_size=1 )
-        
+        #Subscribed to move command topic
+        self.Move_sub = rospy.Subscriber('/mux_cmd_vel', Twist, self.E_STOP_CB, queue_size=1 )
+        self.Move_pub = rospy.Publisher('/watchdog/cmd_vel', Twist, queue_size=1)
 
-    def E_STOP_CB(self, status):
-        #print(type(status.data))
+    def E_STOP_CB(self, data):
         
-        if status.data == 0:
-            print('status is good')
-        elif status.data == 1:
-            print('E_STOP')
-        else:
-            print('Status unknown')
+        self.stop_msg = Twist() 
+
+        if self.status == 0:
+            self.Move_pub.publish(data)
+        else :
+            self.Move_pub.publish(self.stop_msg)
+
+    def status_watch(self, state):
+        self.status = state
         
 
 if __name__ == '__main__':
@@ -135,12 +138,13 @@ if __name__ == '__main__':
         updater.force_update()
         updaters.append(updater)
 
-    #E_stop = Emergency_stop()
+    E_stop = Emergency_stop()
 
     while not rospy.is_shutdown():
         rospy.sleep(0.1)
         # We can call updater.update whenever is convenient. It will take care
         # of rate-limiting the updates.
+        E_stop.status_watch(freq_check.state)
         for u in updaters:
             u.force_update()
 
