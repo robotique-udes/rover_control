@@ -78,24 +78,21 @@ class FrequencyStatus(DiagnosticTask):
 
         return stat
 
-class Emergency_stop(int):
+class Emergency_stop:
 
-    def __init__(self):
+    def __init__(self, freq_check):
+        self.freq_check = freq_check
+
         #Subscribed to move command topic
         self.Move_sub = rospy.Subscriber('/mux_cmd_vel', Twist, self.E_STOP_CB, queue_size=1 )
         self.Move_pub = rospy.Publisher('/watchdog/cmd_vel', Twist, queue_size=1)
 
     def E_STOP_CB(self, data):
-        
-        self.stop_msg = Twist() 
-
-        if self.status == 0:
+        if self.freq_check.state == 0:
             self.Move_pub.publish(data)
         else :
-            self.Move_pub.publish(self.stop_msg)
-
-    def status_watch(self, state):
-        self.status = state
+            # Publish a 0 velocity message for safety
+            self.Move_pub.publish(Twist())
         
 
 if __name__ == '__main__':
@@ -138,13 +135,12 @@ if __name__ == '__main__':
         updater.force_update()
         updaters.append(updater)
 
-    E_stop = Emergency_stop()
+    E_stop = Emergency_stop(freq_check)
 
     while not rospy.is_shutdown():
         rospy.sleep(0.1)
         # We can call updater.update whenever is convenient. It will take care
         # of rate-limiting the updates.
-        E_stop.status_watch(freq_check.state)
         for u in updaters:
             u.force_update()
 
