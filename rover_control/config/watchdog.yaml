@@ -28,16 +28,17 @@ sensor_4:
   min_freq: 90
 
 sensor_5:
+  name: Base_Station_Heartbeat
+  sensor_id: Heartbeat
+  topic: /heartbeat
+  max_freq: 25
+  min_freq: 15
+
+sensor_6:
   name: Color_camera
   sensor_id: Color_camera
   topic: /d435/color/image_raw
   max_freq: 20
   min_freq: 10
 
-sensor_6:
-  name: Base_Station_Heartbeat
-  sensor_id: Heartbeat
-  topic: /heartbeat
-  max_freq: 25
-  min_freq: 15
 
