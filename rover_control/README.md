@@ -16,5 +16,7 @@ How to use watchdog:
 
 	make sure 'num_items' in aggregator.yaml match 'nb_sensors' in watchdog.yaml 
 
-	- Launch watchdog with launch file 
+	- watchdog is launched by control.launch file 
 	- Launch rqt_robot_monitor
+
+topic: /watchdog/cmd_vel
