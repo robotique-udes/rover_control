@@ -55,3 +55,7 @@ target_link_libraries(gps_node ${catkin_LIBRARIES})
 add_executable(camera_control_server src/camera_control_server.cpp)
 add_dependencies(camera_control_server ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 target_link_libraries(camera_control_server ${catkin_LIBRARIES})
+
+add_executable(science_control src/science_control.cpp)
+add_dependencies(science_control ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+target_link_libraries(science_control ${catkin_LIBRARIES})
