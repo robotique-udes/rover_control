@@ -12,7 +12,7 @@
 #define OUT
 
 // Needs to be params
-#define CAM_TOPIC "/cam_sonix/image"
+#define CAM_TOPIC "/cam_desaxee/image"
 #define NB_PICS 4
 
 bool takePicture(std::string topic_name, cv_bridge::CvImagePtr img);
@@ -100,7 +100,25 @@ bool CBPanorama(rover_control_msgs::camera_controlRequest &req, rover_control_ms
             ROS_INFO("Aruco marker detected: %s", str_ids.c_str());
         }
 
-        res.result = true;
+                std::string path = ros::package::getPath("rover_control");
+        boost::posix_time::ptime my_posix_time = ros::Time::now().toBoost();
+        std::string time_stamp = boost::posix_time::to_iso_extended_string(my_posix_time);
+        std::replace(time_stamp.begin(), time_stamp.end(), ':', '-');
+
+        path.append("/img/" + time_stamp + ".png");
+
+        if (!cv::imwrite(path, img))
+        {
+            ROS_ERROR("Error when saving Panorama at: \"%s\"", path.c_str());
+            res.result = false;
+            break;
+        }
+        else
+        {
+            ROS_INFO("Panorama as been save: %s ", path.c_str());
+            res.result = true;
+            break;
+        }
     }
     break;
 
@@ -135,13 +153,16 @@ bool CBPanorama(rover_control_msgs::camera_controlRequest &req, rover_control_ms
 
         if (!cv::imwrite(path, img_panorama))
         {
-            ROS_FATAL("Error when saving Panorama");
-            exit(1);
+            ROS_ERROR("Error when saving Panorama at: \"%s\"", path.c_str());
+            res.result = false;
+            break;
         }
-        ROS_INFO("Panorama as been save: %s ", path.c_str());
-
-        res.result = true;
-        break;
+        else
+        {
+            ROS_INFO("Panorama as been save: %s ", path.c_str());
+            res.result = true;
+            break;
+        }
     }
 
     case rover_control_msgs::camera_controlRequest::CMD_RESET_PICTURES:
