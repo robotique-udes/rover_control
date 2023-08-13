@@ -97,7 +97,7 @@ int main(int argc, char *argv[])
     int serial_port = 0;
     if (initialiseDevice(nh.param<std::string>(ros::this_node::getName() + "/port",
                                                "/dev/serial/by-id/usb-Prolific_Technology_Inc._USB-Serial_Controller_D-if00-port0"),
-                         &serial_port) != 1)
+                         &serial_port) != 1)    
     {
         ROS_ERROR("%s:main() Error in serial device init, exiting", ros::this_node::getName().c_str());
         return ErrorCodes::Failure;

@@ -13,7 +13,7 @@
     Args
     =========================================================================-->
     <arg name="relay_board_port" default="/dev/serial/by-id/usb-Devantech_Ltd._USB-RLY16L._00055872-if00" />
-    <arg name="gps_device_port" default="/dev/serial/by-id/usb-Prolific_Technology_Inc._USB-Serial_Controller_D-if00-port0" />
+    <!-- <arg name="gps_device_port" default="/dev/serial/by-id/usb-Prolific_Technology_Inc._USB-Serial_Controller_D-if00-port0" /> -->
 
     <!--========================================================================
     Nodes
@@ -36,9 +36,9 @@
         <param name="outputs" value="8" type="int" />
     </node>
 
-    <node machine="rover" type="gps_node" name="serial_gps_node" pkg="rover_control" output="screen">
+    <!-- <node machine="rover" type="gps_node" name="serial_gps_node" pkg="rover_control" output="screen">
         <param name="port" value="$(arg gps_device_port)" />
-    </node>
+    </node> -->
 
     <!-- Launch driver for each motor -->
     <node machine="rover" pkg="ros_talon" name="motor1" type="direct_drive" output="screen">
